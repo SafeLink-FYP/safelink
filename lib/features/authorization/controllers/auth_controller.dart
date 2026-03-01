@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:safelink/core/services/supabase_service.dart';
 import 'package:safelink/core/utilities/dialog_helpers.dart';
+import 'package:safelink/features/authorization/models/auth_models.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthController extends GetxController {
@@ -25,28 +26,15 @@ class AuthController extends GetxController {
   }
 
   /// SIGN OUT
-  Future<void> signUp({
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String password,
-    required String dateOfBirth,
-    String? phone,
-    File? profilePicture,
-  }) async {
+  Future<void> signUp(SignUpModel model) async {
     try {
       isLoading.value = true;
       DialogHelpers.showLoadingDialog();
 
       final AuthResponse response = await _supabaseService.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'firstName': firstName,
-          'lastName': lastName,
-          'dateOfBirth': dateOfBirth,
-          'role': 'citizen',
-        },
+        email: model.email,
+        password: model.password,
+        data: model.toAuthMetadata(),
       );
 
       final user = response.user;
@@ -55,22 +43,20 @@ class AuthController extends GetxController {
       }
 
       String? avatarUrl;
-      if (profilePicture != null) {
-        avatarUrl = await _uploadAvatar(user.id, profilePicture);
+
+      if (model.profilePicture != null) {
+        avatarUrl = await _uploadAvatar(user.id, model.profilePicture!);
       }
+
       await _supabaseService.profiles
-          .update({
-            'phone': phone,
-            'date_of_birth': dateOfBirth,
-            if (avatarUrl != null) 'avatar_url': avatarUrl,
-          })
+          .update(model.toProfileUpdate(avatarUrl))
           .eq('id', user.id);
 
       DialogHelpers.hideLoadingDialog();
       DialogHelpers.showSuccess(
         title: 'Success',
         message:
-            'Account created successfully! Please check your email to verify your account.',
+        'Account created successfully! Please check your email to verify your account.',
       );
       Get.offAllNamed('signInView');
     } on AuthException catch (e) {
@@ -85,14 +71,14 @@ class AuthController extends GetxController {
   }
 
   /// SIGN IN
-  Future<void> signIn({required String email, required String password}) async {
+  Future<void> signIn(SignInModel model) async {
     try {
       isLoading.value = true;
       DialogHelpers.showLoadingDialog();
 
       await _supabaseService.auth.signInWithPassword(
-        email: email,
-        password: password,
+        email: model.email,
+        password: model.password,
       );
 
       DialogHelpers.hideLoadingDialog();
@@ -131,12 +117,12 @@ class AuthController extends GetxController {
   }
 
   /// RESET PASSWORD
-  Future<void> resetPassword({required String email}) async {
+  Future<void> resetPassword(ResetPasswordModel model) async {
     try {
       isLoading.value = true;
       DialogHelpers.showLoadingDialog();
 
-      await _supabaseService.auth.resetPasswordForEmail(email);
+      await _supabaseService.auth.resetPasswordForEmail(model.email);
 
       DialogHelpers.hideLoadingDialog();
       DialogHelpers.showSuccess(
@@ -164,10 +150,10 @@ class AuthController extends GetxController {
       await _supabaseService.storage
           .from('avatars')
           .upload(
-            path,
-            file,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
-          );
+        path,
+        file,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+      );
 
       return _supabaseService.storage.from('avatars').getPublicUrl(path);
     } catch (e) {

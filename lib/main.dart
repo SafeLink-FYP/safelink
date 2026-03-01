@@ -37,10 +37,10 @@ class MyApp extends StatelessWidget {
           builder: (controller) {
             return Obx(() {
               return GetMaterialApp(
+                debugShowCheckedModeBanner: false,
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
                 themeMode: controller.themeMode,
-                debugShowCheckedModeBanner: false,
                 initialBinding: InitialBindings(),
                 initialRoute: AppRoutes.splashView,
                 getPages: AppRoutes.routes,

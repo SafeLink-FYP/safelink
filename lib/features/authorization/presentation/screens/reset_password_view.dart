@@ -7,6 +7,7 @@ import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/utilities/validators.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
+import 'package:safelink/features/authorization/models/auth_models.dart';
 import 'package:safelink/features/authorization/presentation/widgets/custom_text_form_field.dart';
 
 class ResetPasswordView extends StatefulWidget {
@@ -94,7 +95,9 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _authController.resetPassword(
-                          email: _emailController.text.trim(),
+                          ResetPasswordModel(
+                            email: _emailController.text.trim(),
+                          ),
                         );
                       }
                     },

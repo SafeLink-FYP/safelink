@@ -46,9 +46,9 @@ class Validators {
 
   // CONFIRM PASSWORD VALIDATION
   static String? validateConfirmPassword(
-    String? confirmPassword,
-    String? originalPassword,
-  ) {
+      String? confirmPassword,
+      String? originalPassword,
+      ) {
     final confirm = confirmPassword?.trim() ?? '';
     final original = originalPassword?.trim() ?? '';
 
@@ -71,6 +71,24 @@ class Validators {
 
     if (!regex.hasMatch(phoneNumber)) {
       return 'Enter a valid phone number';
+    }
+
+    return null;
+  }
+
+  // CNIC VALIDATION (Pakistan)
+  static String? validateCNIC(String? cnic) {
+    final value = cnic?.trim() ?? '';
+
+    if (value.isEmpty) {
+      return 'CNIC is required';
+    }
+
+    // Format: 35202-1234567-1
+    final regex = RegExp(r'^[0-9]{5}-[0-9]{7}-[0-9]{1}$');
+
+    if (!regex.hasMatch(value)) {
+      return 'Enter a valid CNIC (XXXXX-XXXXXXX-X)';
     }
 
     return null;
@@ -107,11 +125,11 @@ class Validators {
     final today = DateTime.now();
     final age =
         today.year -
-        dob.year -
-        ((today.month < dob.month ||
+            dob.year -
+            ((today.month < dob.month ||
                 (today.month == dob.month && today.day < dob.day))
-            ? 1
-            : 0);
+                ? 1
+                : 0);
 
     if (dob.isAfter(today)) {
       return 'Date of birth cannot be in the future';

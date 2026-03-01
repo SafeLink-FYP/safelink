@@ -12,6 +12,7 @@ import 'package:safelink/features/authorization/controllers/auth_controller.dart
 import 'package:safelink/features/authorization/controllers/image_picking_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
 import 'package:safelink/features/authorization/controllers/sign_up_page_controller.dart';
+import 'package:safelink/features/authorization/models/auth_models.dart';
 import 'package:safelink/features/authorization/presentation/widgets/custom_text_form_field.dart';
 import 'package:safelink/features/authorization/presentation/widgets/date_picker_text_field.dart';
 import 'package:safelink/features/authorization/presentation/widgets/social_button.dart';
@@ -50,6 +51,8 @@ class _SignUpViewState extends State<SignUpView> {
     _dobController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _imagePickingController.dispose();
+    _signUpPageController.dispose();
     super.dispose();
   }
 
@@ -528,14 +531,17 @@ class _SignUpViewState extends State<SignUpView> {
         CustomElevatedButton(
           label: 'Complete Registration',
           onPressed: () => _authController.signUp(
-            firstName: _firstNameController.text.trim(),
-            lastName: _lastNameController.text.trim(),
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            dateOfBirth: _dobController.text.trim(),
-            profilePicture: _imagePickingController.selectedImage.value != null
-                ? File(_imagePickingController.selectedImage.value!.path)
-                : null,
+            SignUpModel(
+              firstName: _firstNameController.text.trim(),
+              lastName: _lastNameController.text.trim(),
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+              dateOfBirth: _dobController.text.trim(),
+              profilePicture:
+                  _imagePickingController.selectedImage.value != null
+                  ? File(_imagePickingController.selectedImage.value!.path)
+                  : null,
+            ),
           ),
         ),
         SizedBox(height: 10.h),

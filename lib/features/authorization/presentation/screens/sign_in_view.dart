@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
+import 'package:safelink/features/authorization/models/auth_models.dart';
 import 'package:safelink/features/authorization/presentation/widgets/custom_text_form_field.dart';
 import 'package:safelink/features/authorization/presentation/widgets/social_button.dart';
 
@@ -111,8 +112,10 @@ class _SignInViewState extends State<SignInView> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _authController.signIn(
+                          SignInModel(
                           email: _emailController.text.trim(),
                           password: _passwordController.text,
+                          ),
                         );
                       }
                     },
