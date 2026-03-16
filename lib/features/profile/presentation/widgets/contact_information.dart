@@ -4,13 +4,22 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/core/widgets/custom_divider.dart';
+import 'package:safelink/features/profile/controllers/profile_controller.dart';
 
-class ContactInformation extends StatelessWidget {
+class ContactInformation extends StatefulWidget {
   const ContactInformation({super.key});
 
   @override
+  State<ContactInformation> createState() => _ContactInformationState();
+}
+
+class _ContactInformationState extends State<ContactInformation> {
+  final ProfileController profileController = Get.find<ProfileController>();
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
@@ -34,26 +43,38 @@ class ContactInformation extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildContactTile(
-            label: 'Phone',
-            description: '+92 300 1234567',
-            leadingIcon: AppAssets.phoneIcon,
-            iconBackgroundGradient: AppTheme.primaryGradient,
-            context: context,
+          Obx(
+            () => _buildContactTile(
+              label: 'Phone',
+              description: profileController.phone,
+              leadingIcon: AppAssets.phoneIcon,
+              iconBackgroundGradient: AppTheme.primaryGradient,
+              context: context,
+            ),
           ),
-          _buildDivider(context: context),
-          _buildContactTile(
-            label: 'Email',
-            description: 'raja.hamid@example.com',
-            leadingIcon: AppAssets.emailIcon,
-            iconBackgroundGradient: AppTheme.purpleGradient,
-            context: context,
+          CustomDivider(),
+          Obx(
+            () => _buildContactTile(
+              label: 'Email',
+              description: profileController.email,
+              leadingIcon: AppAssets.emailIcon,
+              iconBackgroundGradient: AppTheme.purpleGradient,
+              context: context,
+            ),
           ),
-          _buildDivider(context: context),
+          CustomDivider(),
           _buildContactTile(
             label: 'Location',
             description: 'Islamabad, Pakistan',
             leadingIcon: AppAssets.locationIcon,
+            trailingWidget: InkWell(
+              onTap: () {},
+              child: Icon(
+                Icons.arrow_forward_ios,
+                color: theme.primaryIconTheme.color,
+                size: 20.sp,
+              ),
+            ),
             iconBackgroundGradient: AppTheme.greenGradient,
             context: context,
           ),
@@ -66,10 +87,11 @@ class ContactInformation extends StatelessWidget {
     required String label,
     required String description,
     required String leadingIcon,
+    Widget? trailingWidget,
     required Gradient iconBackgroundGradient,
     required BuildContext context,
   }) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,27 +119,8 @@ class ContactInformation extends StatelessWidget {
           ],
         ),
         Spacer(),
-        Icon(Icons.arrow_forward_ios, size: 15.sp),
+        if (trailingWidget != null) trailingWidget,
       ],
-    );
-  }
-
-  Widget _buildDivider({required BuildContext context}) {
-    return Container(
-      height: 1,
-      margin: EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.grey.shade400,
-            Colors.grey.shade200,
-            Colors.grey.shade400,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
-      ),
     );
   }
 }

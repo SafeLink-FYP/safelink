@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 
 class ActiveAlert extends StatelessWidget {
@@ -26,7 +25,7 @@ class ActiveAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(

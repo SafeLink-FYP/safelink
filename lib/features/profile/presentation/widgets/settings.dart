@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/theme_toggle.dart';
+import 'package:safelink/features/profile/presentation/widgets/theme_toggle.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
@@ -36,34 +35,6 @@ class Settings extends StatelessWidget {
       child: Column(
         children: [
           _buildSettingTile(
-            label: 'Notifications',
-            leadingIcon: AppAssets.notificationIcon,
-            trailing: Icon(Icons.arrow_forward_ios, size: 15.sp),
-            context: context,
-          ),
-          _buildDivider(context: context),
-          _buildSettingTile(
-            label: 'Location Services',
-            leadingIcon: AppAssets.locationIcon,
-            trailing: Icon(Icons.arrow_forward_ios, size: 15.sp),
-            context: context,
-          ),
-          _buildDivider(context: context),
-          _buildSettingTile(
-            label: 'Emergency Contacts',
-            leadingIcon: AppAssets.waveIcon,
-            trailing: Icon(Icons.arrow_forward_ios, size: 15.sp),
-            context: context,
-          ),
-          _buildDivider(context: context),
-          _buildSettingTile(
-            label: 'App Settings',
-            leadingIcon: AppAssets.settingsIcon,
-            trailing: Icon(Icons.arrow_forward_ios, size: 15.sp),
-            context: context,
-          ),
-          _buildDivider(context: context),
-          _buildSettingTile(
             label: 'Theme',
             leadingIcon: AppAssets.settingsIcon,
             trailing: ThemeToggle(),
@@ -80,7 +51,7 @@ class Settings extends StatelessWidget {
     required Widget trailing,
     required BuildContext context,
   }) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
@@ -101,25 +72,6 @@ class Settings extends StatelessWidget {
         Spacer(),
         trailing,
       ],
-    );
-  }
-
-  Widget _buildDivider({required BuildContext context}) {
-    return Container(
-      height: 1.h,
-      margin: EdgeInsets.symmetric(vertical: 10.h),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.grey.shade400,
-            Colors.grey.shade200,
-            Colors.grey.shade400,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
-      ),
     );
   }
 }

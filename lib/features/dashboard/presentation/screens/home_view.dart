@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -6,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/features/dashboard/controllers/alert_controller.dart';
 import 'package:safelink/features/dashboard/controllers/navigation_controller.dart';
 import 'package:safelink/features/dashboard/presentation/widgets/active_alert.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
@@ -21,10 +21,11 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final NavigationController navigationController =
       Get.find<NavigationController>();
+  final AlertController alertController = Get.find<AlertController>();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -54,19 +55,32 @@ class _HomeViewState extends State<HomeView> {
                             ),
                           ],
                         ),
-                        Container(
-                          padding: EdgeInsets.all(15.r),
-                          decoration: BoxDecoration(
-                            color: AppTheme.white.withValues(alpha: 0.20),
-                            shape: BoxShape.circle,
-                          ),
-                          child: SvgPicture.asset(
-                            AppAssets.notificationIcon,
-                            width: 20.w,
-                            height: 20.h,
-                            colorFilter: ColorFilter.mode(
-                              AppTheme.white,
-                              BlendMode.srcIn,
+                        InkWell(
+                          onTap: () => Get.toNamed('notificationsView'),
+                          child: Container(
+                            padding: EdgeInsets.all(15.r),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withValues(
+                                alpha: 0.60,
+                              ),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.25),
+                                  offset: Offset(0, 20),
+                                  blurRadius: 25.r,
+                                  spreadRadius: -5.r,
+                                ),
+                              ],
+                            ),
+                            child: SvgPicture.asset(
+                              AppAssets.notificationIcon,
+                              width: 20.w,
+                              height: 20.h,
+                              colorFilter: ColorFilter.mode(
+                                AppTheme.white,
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
                         ),
@@ -122,7 +136,7 @@ class _HomeViewState extends State<HomeView> {
                             ),
                             child: FaIcon(
                               FontAwesomeIcons.shieldHalved,
-                              color: AppTheme.white,
+                              color: theme.iconTheme.color,
                             ),
                           ),
                           SizedBox(width: 10.w),
@@ -156,7 +170,7 @@ class _HomeViewState extends State<HomeView> {
                                 color: AppTheme.primaryColor.withValues(
                                   alpha: 0.75,
                                 ),
-                                width: 1,
+                                width: 1.w,
                               ),
                             ),
                             child: Text(
@@ -182,19 +196,19 @@ class _HomeViewState extends State<HomeView> {
                       children: [
                         HomeQuickAction(
                           label: 'View Heatmap',
-                          icon: FontAwesomeIcons.map,
+                          icon: AppAssets.mapIcon,
                           iconBackgroundGradient: AppTheme.primaryGradient,
                           onTap: () => navigationController.changePage(1),
                         ),
                         HomeQuickAction(
                           label: 'Emergency SOS',
-                          icon: FontAwesomeIcons.triangleExclamation,
+                          icon: AppAssets.sosIcon,
                           iconBackgroundGradient: AppTheme.redGradient,
                           onTap: () => navigationController.changePage(2),
                         ),
                         HomeQuickAction(
                           label: 'Get Help',
-                          icon: FontAwesomeIcons.message,
+                          icon: AppAssets.chatIcon,
                           iconBackgroundGradient: AppTheme.greenGradient,
                           onTap: () => navigationController.changePage(3),
                         ),
@@ -208,44 +222,81 @@ class _HomeViewState extends State<HomeView> {
                           'Active Alerts',
                           style: theme.textTheme.headlineLarge,
                         ),
-                        RichText(
-                          text: TextSpan(
+                        InkWell(
+                          onTap: () => Get.toNamed('/alertsListView'),
+                          child: Text(
+                            'View All',
                             style: theme.textTheme.displayMedium,
-                            children: [
-                              TextSpan(
-                                text: 'View All',
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () => Get.toNamed(''),
-                              ),
-                            ],
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 25.h),
-                    Column(
-                      children: [
-                        ActiveAlert(
-                          label: 'Flood Warning',
-                          location: 'Islamabad',
-                          time: '2 hours ago',
-                          icon: AppAssets.dropletsIcon,
-                          alertLevel: 'Medium',
-                          iconColor: AppTheme.orange,
-                          iconBackgroundColor: AppTheme.lightOrange,
-                        ),
-                        SizedBox(height: 10.h),
-                        ActiveAlert(
-                          label: 'Aftershock Warning',
-                          location: 'Islamabad',
-                          time: '5 hours ago',
-                          alertLevel: 'High',
-                          icon: AppAssets.waveIcon,
-                          iconColor: Color(0xFFE7000B),
-                          iconBackgroundColor: Color(0xFFFEF2F2),
-                        ),
-                      ],
-                    ),
+                    Obx(() {
+                      if (alertController.isLoading.value) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (alertController.alerts.isEmpty) {
+                        return Container(
+                          padding: EdgeInsets.all(20.r),
+                          decoration: BoxDecoration(
+                            color: AppTheme.green.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: AppTheme.green.withValues(alpha: 0.20),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: AppTheme.green,
+                                size: 24.sp,
+                              ),
+                              SizedBox(width: 10.w),
+                              Text(
+                                'No active alerts in your area',
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  color: AppTheme.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return Column(
+                        children: alertController.alerts
+                            .take(3)
+                            .map(
+                              (alert) => Padding(
+                                padding: EdgeInsets.only(bottom: 10.h),
+                                child: InkWell(
+                                  onTap: () => Get.toNamed(
+                                    '/alertDetailView',
+                                    arguments: alert,
+                                  ),
+                                  child: ActiveAlert(
+                                    label: alert.title,
+                                    location: alert.location ?? 'Unknown',
+                                    time: alert.timeAgo,
+                                    alertLevel:
+                                        alert.severity.capitalizeFirst ?? 'Low',
+                                    icon: alertController.getAlertIcon(
+                                      alert.type,
+                                    ),
+                                    iconColor: _getSeverityColor(
+                                      alert.severity,
+                                    ),
+                                    iconBackgroundColor: _getSeverityBgColor(
+                                      alert.severity,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    }),
                     SizedBox(height: 25.h),
                     Text('Safety Tips', style: theme.textTheme.headlineLarge),
                     SizedBox(height: 25.h),
@@ -306,5 +357,27 @@ class _HomeViewState extends State<HomeView> {
         ),
       ),
     );
+  }
+
+  Color _getSeverityColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'critical':
+        return AppTheme.red;
+      case 'medium':
+        return AppTheme.orange;
+      default:
+        return AppTheme.primaryColor;
+    }
+  }
+
+  Color _getSeverityBgColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'critical':
+        return AppTheme.lightRed;
+      case 'medium':
+        return AppTheme.lightOrange;
+      default:
+        return const Color(0xFFEFF6FF);
+    }
   }
 }

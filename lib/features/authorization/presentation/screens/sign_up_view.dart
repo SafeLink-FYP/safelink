@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/utilities/validators.dart';
+import 'package:safelink/core/widgets/profile_avatar.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/features/authorization/controllers/image_picking_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
@@ -35,9 +35,8 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final ImagePickingController _imagePickingController = Get.put(
-    ImagePickingController(),
-  );
+  final ImagePickingController _imagePickingController =
+      Get.find<ImagePickingController>();
   final SignUpPageController _signUpPageController = Get.put(
     SignUpPageController(),
   );
@@ -58,7 +57,7 @@ class _SignUpViewState extends State<SignUpView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: Form(
@@ -228,7 +227,7 @@ class _SignUpViewState extends State<SignUpView> {
         SizedBox(height: 30.h),
         CustomTextFormField(
           label: 'First Name',
-          hintText: 'First name',
+          hintText: 'First Name',
           controller: _firstNameController,
           validator: (value) => Validators.validateName(value),
           icon: CupertinoIcons.person,
@@ -236,15 +235,15 @@ class _SignUpViewState extends State<SignUpView> {
         SizedBox(height: 20.h),
         CustomTextFormField(
           label: 'Last Name',
-          hintText: 'Last name',
+          hintText: 'Last Name',
           controller: _lastNameController,
           validator: (value) => Validators.validateName(value),
           icon: CupertinoIcons.person,
         ),
         SizedBox(height: 20.h),
         CustomTextFormField(
-          label: 'Phone (Optional)',
-          hintText: 'Enter phone number',
+          label: 'Phone',
+          hintText: 'Enter Phone Number',
           controller: _phoneController,
           validator: (value) => Validators.validatePhoneNumber(value),
           icon: CupertinoIcons.phone,
@@ -364,7 +363,7 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   Widget _buildPasswordRuleRow(String label, RxBool isValid) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -404,14 +403,6 @@ class _SignUpViewState extends State<SignUpView> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Align(
-          alignment: Alignment.topLeft,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () => Get.back(),
-          ),
-        ),
-        SizedBox(height: 30.h),
         Text(
           'Add a profile picture',
           style: theme.textTheme.titleLarge,
@@ -423,106 +414,18 @@ class _SignUpViewState extends State<SignUpView> {
           style: theme.textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 30.h),
+        SizedBox(height: 15.h),
         Obx(() {
           final image = _imagePickingController.selectedImage.value;
-          return Stack(
-            children: [
-              Container(
-                height: 200.h,
-                width: 200.w,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.primaryColor.withValues(alpha: 0.30),
-                      offset: const Offset(0, 25),
-                      blurRadius: 50.r,
-                      spreadRadius: -12.r,
-                    ),
-                  ],
-                ),
-                child: image != null
-                    ? Image.file(File(image.path), fit: BoxFit.fill)
-                    : Container(
-                        padding: EdgeInsets.all(50.r),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: AppTheme.primaryGradient,
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.primaryColor.withValues(alpha: 0.30),
-                              offset: const Offset(0, 25),
-                              blurRadius: 50.r,
-                              spreadRadius: -12.r,
-                            ),
-                          ],
-                        ),
-                        child: SvgPicture.asset(
-                          AppAssets.cameraIcon,
-                          width: 50.w,
-                          height: 50.h,
-                        ),
-                      ),
-              ),
-              if (image != null)
-                Positioned(
-                  bottom: 20.h,
-                  right: 10.w,
-                  child: InkWell(
-                    onTap: () =>
-                        _imagePickingController.selectedImage.value = null,
-                    borderRadius: BorderRadius.circular(20.r),
-                    child: Container(
-                      padding: EdgeInsets.all(5.r),
-                      decoration: BoxDecoration(
-                        color: AppTheme.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 18.sp,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+          return ProfileAvatar(
+            image: image != null ? File(image.path) : null,
+            onPickImage: _imagePickingController.pickImage,
+            onRemoveImage: () =>
+                _imagePickingController.selectedImage.value = null,
+            showControls: true,
           );
         }),
-        SizedBox(height: 35.h),
-        InkWell(
-          borderRadius: BorderRadius.circular(15.r),
-          splashColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-          highlightColor: theme.colorScheme.primary.withValues(alpha: 0.08),
-          hoverColor: theme.colorScheme.primary.withValues(alpha: 0.05),
-          onTap: () => _imagePickingController.pickImage(),
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 25.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.r),
-              color: theme.colorScheme.surfaceContainerHigh,
-              border: Border.all(color: theme.colorScheme.outline),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  AppAssets.uploadIcon,
-                  colorFilter: ColorFilter.mode(
-                    theme.iconTheme.color!,
-                    BlendMode.srcIn,
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Text('Upload Photo', style: theme.textTheme.headlineLarge),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 20.h),
+        SizedBox(height: 10.h),
         Text(
           'Recommended: Square image, at least 400x400px',
           style: theme.textTheme.bodySmall,
@@ -536,6 +439,7 @@ class _SignUpViewState extends State<SignUpView> {
               lastName: _lastNameController.text.trim(),
               email: _emailController.text.trim(),
               password: _passwordController.text,
+              phone: _phoneController.text.trim(),
               dateOfBirth: _dobController.text.trim(),
               profilePicture:
                   _imagePickingController.selectedImage.value != null

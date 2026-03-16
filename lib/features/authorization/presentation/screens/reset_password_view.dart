@@ -24,7 +24,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(

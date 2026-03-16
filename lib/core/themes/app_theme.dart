@@ -76,7 +76,7 @@ class AppTheme {
       surfaceContainerHigh: lightBackgroundColor,
       inverseSurface: lightGreyColor,
     ),
-    iconTheme: IconThemeData(color: black, size: 20.sp),
+    iconTheme: IconThemeData(color: white, size: 20.sp),
     cardColor: white,
     dividerColor: borderColor,
     textTheme: TextTheme(
@@ -189,6 +189,21 @@ class AppTheme {
         borderSide: BorderSide(color: red.withValues(alpha: 0.6)),
       ),
     ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      titleTextStyle: GoogleFonts.roboto(
+        fontSize: 18.sp,
+        fontWeight: FontWeight.bold,
+        color: lightTextColor,
+      ),
+      contentTextStyle: GoogleFonts.roboto(
+        fontSize: 14.sp,
+        color: lightSubTextColor,
+      ),
+    ),
   );
 
   static final ThemeData darkTheme = ThemeData(
@@ -202,8 +217,8 @@ class AppTheme {
       surfaceContainerHigh: darkBackgroundColor,
       inverseSurface: white,
     ),
-    iconTheme: IconThemeData(color: white, size: 20.sp),
-    cardColor: black.withValues(alpha: 0.40),
+    iconTheme: IconThemeData(color: black, size: 20.sp),
+    cardColor: black,
     dividerColor: white.withValues(alpha: 0.10),
     textTheme: TextTheme(
       displayLarge: GoogleFonts.roboto(
@@ -313,6 +328,21 @@ class AppTheme {
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10.r),
         borderSide: BorderSide(color: red.withValues(alpha: 0.6)),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: darkBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      titleTextStyle: GoogleFonts.roboto(
+        fontSize: 18.sp,
+        fontWeight: FontWeight.bold,
+        color: darkTextColor,
+      ),
+      contentTextStyle: GoogleFonts.roboto(
+        fontSize: 14.sp,
+        color: darkSubTextColor,
       ),
     ),
   );

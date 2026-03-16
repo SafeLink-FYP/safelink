@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
+import 'package:safelink/core/services/cache_service.dart';
+import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -16,13 +18,45 @@ class _SplashViewState extends State<SplashView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 2500));
-      Get.toNamed('onboardingView');
+      await _resolveInitialRoute();
     });
+  }
+
+  Future<void> _resolveInitialRoute() async {
+    final cache = CacheService.instance;
+    final authController = Get.find<AuthController>();
+
+    final hasSession = await authController.checkSession();
+    if (hasSession) {
+      Get.offAllNamed('mainDashboardView');
+      return;
+    }
+
+    if (cache.isRememberMeEnabled) {
+      final email = cache.rememberedEmail;
+      final password = cache.rememberedPassword;
+      if (email != null && password != null) {
+        final success = await authController.silentSignIn(
+          email: email,
+          password: password,
+        );
+        if (success) {
+          Get.offAllNamed('mainDashboardView');
+          return;
+        }
+      }
+    }
+
+    if (cache.isOnboardingComplete) {
+      Get.offAllNamed('signInView');
+    } else {
+      Get.offAllNamed('onboardingView');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(

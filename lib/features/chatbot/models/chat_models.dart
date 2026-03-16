@@ -1,6 +1,6 @@
 enum MessageType { user, bot, system }
 
-enum UrgencyLevel { low, medium, high, critical }
+enum UrgencyLevel { low, medium, critical }
 
 class ChatMessage {
   final String id;
@@ -73,8 +73,6 @@ class ChatMessage {
     switch (level?.toLowerCase()) {
       case 'critical':
         return UrgencyLevel.critical;
-      case 'high':
-        return UrgencyLevel.high;
       case 'medium':
         return UrgencyLevel.medium;
       default:

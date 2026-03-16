@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:safelink/features/authorization/presentation/widgets/custom_text_form_field.dart';
 
 class DatePickerTextField extends StatelessWidget {
@@ -24,7 +23,7 @@ class DatePickerTextField extends StatelessWidget {
   });
 
   Future<void> _selectDate(BuildContext context) async {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),

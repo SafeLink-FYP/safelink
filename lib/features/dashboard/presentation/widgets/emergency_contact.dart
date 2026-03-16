@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/features/dashboard/controllers/emergency_contact_controller.dart';
 
 class EmergencyContact extends StatelessWidget {
   final String label;
@@ -17,7 +18,9 @@ class EmergencyContact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final EmergencyContactController emergencyContactController =
+        Get.find<EmergencyContactController>();
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
@@ -64,14 +67,21 @@ class EmergencyContact extends StatelessWidget {
             ],
           ),
           Spacer(),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(AppTheme.green),
-            ),
-            onPressed: () {},
-            child: Text(
-              'Call',
-              style: theme.textTheme.bodyLarge?.copyWith(color: AppTheme.white),
+          InkWell(
+            onTap: () => emergencyContactController.makeCall(description),
+            borderRadius: BorderRadius.circular(25.r),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: AppTheme.green,
+                borderRadius: BorderRadius.circular(25.r),
+              ),
+              child: Text(
+                'Call',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  color: AppTheme.white,
+                ),
+              ),
             ),
           ),
         ],

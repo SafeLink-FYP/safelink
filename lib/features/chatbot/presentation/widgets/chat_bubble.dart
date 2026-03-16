@@ -53,14 +53,12 @@ class _ChatBubbleState extends State<ChatBubble> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     final isUser = widget.message.type == MessageType.user;
     final isSystem = widget.message.type == MessageType.system;
     final isLoading = widget.message.isLoading;
     final isEmergency = widget.message.isEmergency;
-    final isCritical =
-        widget.message.urgencyLevel == UrgencyLevel.critical ||
-        widget.message.urgencyLevel == UrgencyLevel.high;
+    final isCritical = widget.message.urgencyLevel == UrgencyLevel.critical;
 
     if (isLoading) {
       return Align(
@@ -78,7 +76,7 @@ class _ChatBubbleState extends State<ChatBubble> {
               SizedBox(
                 width: 20.w,
                 height: 20.h,
-                child: CircularProgressIndicator(strokeWidth: 2.w),
+                child: CircularProgressIndicator(strokeWidth: 1.w),
               ),
               SizedBox(width: 10.w),
               Text('Typing...', style: theme.textTheme.bodySmall),

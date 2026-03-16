@@ -7,7 +7,7 @@ class SignUpModel {
   final String email;
   final String password;
   final String dateOfBirth;
-  final String? phone;
+  final String phone;
   final File? profilePicture;
 
   const SignUpModel({
@@ -15,7 +15,7 @@ class SignUpModel {
     required this.lastName,
     required this.email,
     required this.password,
-    this.phone,
+    required this.phone,
     required this.dateOfBirth,
     this.profilePicture,
   });
@@ -28,7 +28,11 @@ class SignUpModel {
     'role': 'citizen',
   };
 
-  Map<String, dynamic> toProfileUpdate(String? avatarUrl) => {
+  Map<String, dynamic> toProfileInsert(String userId, String? avatarUrl) => {
+    'id': userId,
+    'first_name': firstName.trim(),
+    'last_name': lastName.trim(),
+    'email': email.trim(),
     'phone': phone,
     'date_of_birth': dateOfBirth,
     if (avatarUrl != null) 'avatar_url': avatarUrl,

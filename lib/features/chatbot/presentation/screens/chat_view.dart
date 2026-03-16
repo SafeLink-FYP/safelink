@@ -57,7 +57,7 @@ class _ChatViewState extends State<ChatView> {
   }
 
   void _showClearChatDialog() {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -88,7 +88,7 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: Column(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 
 class CustomElevatedButton extends StatelessWidget {
@@ -15,7 +14,7 @@ class CustomElevatedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(10.r),

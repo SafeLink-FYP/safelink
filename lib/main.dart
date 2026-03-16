@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/controllers/theme_controller.dart';
 import 'package:safelink/core/secrets/app_secrets.dart';
+import 'package:safelink/core/services/cache_service.dart';
 import 'package:safelink/core/services/initial_bindings.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/utilities/app_routes.dart';
@@ -15,6 +16,7 @@ void main() async {
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
   await ScreenUtil.ensureScreenSize();
+  await CacheService.instance.init();
   await ThemeController.instance.init();
   await Supabase.initialize(
     url: AppSecrets.supabaseUrl,

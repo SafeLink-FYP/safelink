@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
+import 'package:safelink/core/services/cache_service.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
 import 'package:safelink/features/authorization/models/auth_models.dart';
@@ -22,10 +23,26 @@ class _SignInViewState extends State<SignInView> {
   final AuthController _authController = Get.find<AuthController>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedCredentials();
+  }
+
+  void _loadRememberedCredentials() {
+    final cache = CacheService.instance;
+    if (cache.isRememberMeEnabled) {
+      _emailController.text = cache.rememberedEmail ?? '';
+      _passwordController.text = cache.rememberedPassword ?? '';
+      setState(() => _rememberMe = true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -82,8 +99,10 @@ class _SignInViewState extends State<SignInView> {
                       Row(
                         children: [
                           Checkbox(
-                            value: false,
-                            onChanged: (value) => value = value!,
+                            value: _rememberMe,
+                            onChanged: (value) {
+                              setState(() => _rememberMe = value ?? false);
+                            },
                           ),
                           Text(
                             'Remember Me',
@@ -113,8 +132,9 @@ class _SignInViewState extends State<SignInView> {
                       if (_formKey.currentState!.validate()) {
                         _authController.signIn(
                           SignInModel(
-                          email: _emailController.text.trim(),
-                          password: _passwordController.text,
+                            email: _emailController.text.trim(),
+                            password: _passwordController.text,
+                            rememberMe: _rememberMe,
                           ),
                         );
                       }

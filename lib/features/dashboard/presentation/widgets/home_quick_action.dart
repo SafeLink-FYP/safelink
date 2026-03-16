@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 
 class HomeQuickAction extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final String icon;
   final Gradient iconBackgroundGradient;
   final void Function()? onTap;
 
@@ -20,7 +19,7 @@ class HomeQuickAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10.r),
@@ -69,7 +68,15 @@ class HomeQuickAction extends StatelessWidget {
                   ),
                 ],
               ),
-              child: FaIcon(icon, color: AppTheme.white, size: 20.sp),
+              child: SvgPicture.asset(
+                icon,
+                height: 20.h,
+                width: 20.w,
+                colorFilter: ColorFilter.mode(
+                  AppTheme.white,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
             SizedBox(height: 15.h),
             Text(label, style: theme.textTheme.headlineSmall),

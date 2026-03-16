@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/features/chatbot/models/chat_models.dart';
 
@@ -12,7 +11,7 @@ class HelplineButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(

@@ -11,7 +11,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     final NavigationController navController = Get.put(NavigationController());
     return Container(
       decoration: BoxDecoration(
@@ -87,7 +87,7 @@ class CustomBottomNavBar extends StatelessWidget {
     required VoidCallback onTap,
     required BuildContext context,
   }) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(

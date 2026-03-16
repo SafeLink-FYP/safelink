@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 
@@ -9,6 +8,7 @@ class RecentCase extends StatelessWidget {
   final String label;
   final String status;
   final String time;
+
   const RecentCase({
     super.key,
     required this.label,
@@ -18,7 +18,7 @@ class RecentCase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Get.theme;
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(15.r),
       decoration: BoxDecoration(
@@ -62,7 +62,7 @@ class RecentCase extends StatelessWidget {
               Row(
                 children: [
                   Text(label, style: theme.textTheme.headlineMedium),
-                  SizedBox(width: 15.w),
+                  SizedBox(width: 25.w),
                   Container(
                     padding: EdgeInsets.symmetric(
                       vertical: 5.h,
@@ -76,7 +76,7 @@ class RecentCase extends StatelessWidget {
                         width: 1.w,
                       ),
                     ),
-                    child: Text(status, style: theme.textTheme.bodySmall),
+                    child: Text(status, style: theme.textTheme.headlineSmall),
                   ),
                 ],
               ),
@@ -85,7 +85,14 @@ class RecentCase extends StatelessWidget {
             ],
           ),
           Spacer(),
-          Icon(Icons.arrow_forward_ios, size: 15.sp),
+          InkWell(
+            onTap: () {},
+            child: Icon(
+              Icons.arrow_forward_ios,
+              color: theme.primaryIconTheme.color,
+              size: 20.sp,
+            ),
+          ),
         ],
       ),
     );
