@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/utilities/validators.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
@@ -30,7 +32,7 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 50.h),
+            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 50.h),
             child: Form(
               key: _formKey,
               child: Column(
@@ -41,9 +43,23 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
                       onPressed: () => Get.back(),
+                      color: AppTheme.darkGreyColor,
                     ),
                   ),
-                  SizedBox(height: 30.h),
+                  Image.asset(
+                        AppAssets.safeLinkLogo,
+                        width: 100.w,
+                        height: 100.h,
+                      )
+                      .animate()
+                      .fadeIn(duration: 600.ms)
+                      .scale(
+                        begin: const Offset(0.8, 0.8),
+                        end: const Offset(1.0, 1.0),
+                        duration: 600.ms,
+                        curve: Curves.easeOutBack,
+                      ),
+                  SizedBox(height: 15.h),
                   Text(
                     'Reset Your Password',
                     style: theme.textTheme.titleLarge,

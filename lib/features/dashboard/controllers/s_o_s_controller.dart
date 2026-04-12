@@ -12,7 +12,6 @@ class SOSController extends GetxController {
   final activeRequest = Rxn<SOSRequestModel>();
   final myRequests = <SOSRequestModel>[].obs;
 
-  // SOS form fields
   final selectedType = SOSType.medical.obs;
   final description = ''.obs;
   final urgency = 'critical'.obs;
@@ -45,7 +44,7 @@ class SOSController extends GetxController {
       final request = await _sosService.createSOSRequest(
         latitude: profile?.latitude ?? 33.6844,
         longitude: profile?.longitude ?? 73.0479,
-        type: selectedType.value.name,
+        disasterType: selectedType.value,
         description: description.value.isEmpty ? null : description.value,
         urgency: urgency.value,
         peopleCount: peopleCount.value,
@@ -99,7 +98,7 @@ class SOSController extends GetxController {
   void resetForm() {
     selectedType.value = SOSType.medical;
     description.value = '';
-    urgency.value = 'high';
+    urgency.value = 'critical';
     peopleCount.value = 1;
   }
 }

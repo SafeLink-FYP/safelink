@@ -1,15 +1,13 @@
-import 'dart:io';
 import 'package:get/get.dart';
-import 'package:safelink/core/services/cache_service.dart';
-import 'package:safelink/core/services/supabase_service.dart';
 import 'package:safelink/core/utilities/dialog_helpers.dart';
 import 'package:safelink/features/authorization/models/auth_models.dart';
+import 'package:safelink/features/authorization/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthController extends GetxController {
   static AuthController get instance => Get.find<AuthController>();
+  final AuthService _authService = Get.find<AuthService>();
 
-  final _supabaseService = SupabaseService.instance;
   final Rx<Session?> _session = Rx<Session?>(null);
   final RxBool isLoading = false.obs;
 
@@ -20,43 +18,24 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _session.value = _supabaseService.auth.currentSession;
-    _supabaseService.auth.onAuthStateChange.listen((data) {
+    _session.value = _authService.currentSession;
+    _authService.authStateChanges.listen((data) {
       _session.value = data.session;
     });
   }
 
-  /// SIGN OUT
+  /// SIGN UP
   Future<void> signUp(SignUpModel model) async {
     try {
       isLoading.value = true;
       DialogHelpers.showLoadingDialog();
 
-      final AuthResponse response = await _supabaseService.auth.signUp(
-        email: model.email,
-        password: model.password,
-        data: model.toAuthMetadata(),
-      );
-
-      final user = response.user;
-      if (user == null) {
-        throw Exception('Registration failed. Please try again.');
-      }
-
-      String? avatarUrl;
-
-      if (model.profilePicture != null) {
-        avatarUrl = await _uploadAvatar(user.id, model.profilePicture!);
-      }
-
-      await _supabaseService.profiles
-          .insert(model.toProfileInsert(user.id, avatarUrl));
+      await _authService.signUp(model);
 
       DialogHelpers.hideLoadingDialog();
       DialogHelpers.showSuccess(
         title: 'Success',
-        message:
-            'Account created successfully! Please check your email to verify your account.',
+        message: 'Account created successfully!',
       );
       Get.offAllNamed('signInView');
     } on AuthException catch (e) {
@@ -76,17 +55,7 @@ class AuthController extends GetxController {
       isLoading.value = true;
       DialogHelpers.showLoadingDialog();
 
-      await _supabaseService.auth.signInWithPassword(
-        email: model.email,
-        password: model.password,
-      );
-
-      final cache = CacheService.instance;
-      await cache.saveRememberMe(
-        enabled: model.rememberMe,
-        email: model.rememberMe ? model.email : null,
-        password: model.rememberMe ? model.password : null,
-      );
+      await _authService.signIn(model);
 
       DialogHelpers.hideLoadingDialog();
       Get.offAllNamed('mainDashboardView');
@@ -101,27 +70,11 @@ class AuthController extends GetxController {
     }
   }
 
-  /// SILENT SIGN IN
-  Future<bool> silentSignIn({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      await _supabaseService.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
   /// SIGN IN VIA GOOGLE OAUTH
   Future<void> signInWithGoogle() async {
     try {
       isLoading.value = true;
-      await _supabaseService.auth.signInWithOAuth(OAuthProvider.google);
+      await _authService.signInWithGoogle();
     } catch (e) {
       DialogHelpers.showFailure(title: 'Error', message: e.toString());
     } finally {
@@ -132,8 +85,7 @@ class AuthController extends GetxController {
   /// SIGN OUT
   Future<void> signOut() async {
     try {
-      await _supabaseService.auth.signOut();
-      await CacheService.instance.clearAllUserData();
+      await _authService.signOut();
       Get.offAllNamed('signInView');
     } catch (e) {
       DialogHelpers.showFailure(title: 'Error', message: 'Sign out Failed');
@@ -146,7 +98,7 @@ class AuthController extends GetxController {
       isLoading.value = true;
       DialogHelpers.showLoadingDialog();
 
-      await _supabaseService.auth.resetPasswordForEmail(model.email);
+      await _authService.resetPassword(model);
 
       DialogHelpers.hideLoadingDialog();
       DialogHelpers.showSuccess(
@@ -165,37 +117,8 @@ class AuthController extends GetxController {
     }
   }
 
-  /// UPLOAD AVATAR
-  Future<String?> _uploadAvatar(String userID, File file) async {
-    try {
-      final extension = file.path.split('.').last;
-      final path = '$userID/avatar.$extension';
-
-      await _supabaseService.storage
-          .from('avatars')
-          .upload(
-            path,
-            file,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
-          );
-
-      return _supabaseService.storage.from('avatars').getPublicUrl(path);
-    } catch (e) {
-      return null;
-    }
-  }
-
   /// CHECK SESSION
   Future<bool> checkSession() async {
-    try {
-      final session = _supabaseService.auth.currentSession;
-      if (session == null) return false;
-      if (session.isExpired) {
-        await _supabaseService.auth.refreshSession();
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return _authService.checkSession();
   }
 }

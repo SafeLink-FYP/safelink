@@ -26,9 +26,7 @@ class NotificationService extends GetxService {
   }
 
   Future<void> markAsRead(String id) async {
-    await _supabase.notifications
-        .update({'is_read': true})
-        .eq('id', id);
+    await _supabase.notifications.update({'is_read': true}).eq('id', id);
   }
 
   Future<void> markAllAsRead() async {

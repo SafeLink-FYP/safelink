@@ -37,6 +37,15 @@ class AppTheme {
     end: Alignment.centerRight,
   );
 
+  static List<BoxShadow> deepBlueGlow = [
+    BoxShadow(
+      color: const Color(0xFF1E40AF).withValues(alpha: 0.40),
+      offset: const Offset(0, 8),
+      blurRadius: 24,
+      spreadRadius: -4,
+    ),
+  ];
+
   static LinearGradient greenGradient = const LinearGradient(
     colors: [Color(0xff00B894), Color(0xff00E676), Color(0xff00B894)],
     stops: [0.0, 0.5, 1.0],
@@ -191,9 +200,7 @@ class AppTheme {
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
       titleTextStyle: GoogleFonts.roboto(
         fontSize: 18.sp,
         fontWeight: FontWeight.bold,
@@ -332,9 +339,7 @@ class AppTheme {
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: darkBackgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.r),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
       titleTextStyle: GoogleFonts.roboto(
         fontSize: 18.sp,
         fontWeight: FontWeight.bold,

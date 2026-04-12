@@ -23,6 +23,8 @@ class SupabaseService {
       client.from('aid_worker_profiles');
   SupabaseQueryBuilder get govOfficialProfiles =>
       client.from('gov_official_profiles');
+  SupabaseQueryBuilder get aidOrganizations =>
+      client.from('aid_organizations');
 
   // FEATURE TABLES
   SupabaseQueryBuilder get emergencyContacts =>
@@ -31,16 +33,15 @@ class SupabaseService {
   SupabaseQueryBuilder get sosRequests => client.from('sos_requests');
   SupabaseQueryBuilder get disasterReports => client.from('disaster_reports');
   SupabaseQueryBuilder get aidRequests => client.from('aid_requests');
+  SupabaseQueryBuilder get aidRequestTimeline =>
+      client.from('aid_request_timeline');
   SupabaseQueryBuilder get teams => client.from('teams');
   SupabaseQueryBuilder get teamMembers => client.from('team_members');
   SupabaseQueryBuilder get resources => client.from('resources');
   SupabaseQueryBuilder get resourceAllocations =>
       client.from('resource_allocations');
-  SupabaseQueryBuilder get shelters => client.from('shelters');
 
   // COMMUNICATION TABLES
-  SupabaseQueryBuilder get chatSessions => client.from('chat_sessions');
-  SupabaseQueryBuilder get chatMessages => client.from('chat_messages');
   SupabaseQueryBuilder get notifications => client.from('notifications');
   SupabaseQueryBuilder get feedback => client.from('feedback');
 
@@ -52,14 +53,13 @@ class SupabaseService {
     return client.rpc(functionName, params: params);
   }
 
-  // MODULE VERIFICATION
-  Future<bool> verifyModuleAccess(String module) async {
+  // ROLE VERIFICATION
+  Future<bool> verifyRoleAccess(String role) async {
     if (userId == null) return false;
     final result = await appRegistrations
         .select('id')
         .eq('user_id', userId!)
-        .eq('module', module)
-        .eq('is_active', true)
+        .eq('role', role)
         .maybeSingle();
     return result != null;
   }

@@ -1,15 +1,17 @@
-import 'package:get/get.dart';
 import 'package:safelink/core/services/supabase_service.dart';
 import 'package:safelink/features/dashboard/models/aid_request_model.dart';
+import 'package:get/get.dart';
 
 class AidRequestService extends GetxService {
   final _supabase = SupabaseService.instance;
 
   Future<AidRequestModel> createAidRequest({
-    required String type,
-    String? description,
+    required String aidType,
+    required String description,
     required String urgency,
     int quantity = 1,
+    int peopleAffected = 1,
+    List<String> imageUrls = const [],
     double? latitude,
     double? longitude,
     String? address,
@@ -17,16 +19,18 @@ class AidRequestService extends GetxService {
     final userId = _supabase.userId!;
     final data = await _supabase.aidRequests
         .insert({
-      'user_id': userId,
-      'type': type,
-      'description': description,
-      'urgency': urgency,
-      'status': 'pending',
-      'quantity': quantity,
-      'latitude': latitude,
-      'longitude': longitude,
-      'address': address,
-    })
+          'user_id': userId,
+          'aid_type': aidType,
+          'description': description,
+          'urgency': urgency,
+          'status': 'pending',
+          'quantity': quantity,
+          'people_affected': peopleAffected,
+          'image_urls': imageUrls,
+          'latitude': latitude,
+          'longitude': longitude,
+          'address': address,
+        })
         .select()
         .single();
     return AidRequestModel.fromJson(data);
@@ -43,8 +47,14 @@ class AidRequestService extends GetxService {
   }
 
   Future<void> cancelAidRequest(String id) async {
-    await _supabase.aidRequests
-        .update({'status': 'cancelled'})
-        .eq('id', id);
+    await _supabase.aidRequests.update({'status': 'cancelled'}).eq('id', id);
+  }
+
+  Future<List<Map<String, dynamic>>> getTimeline(String requestId) async {
+    final data = await _supabase.aidRequestTimeline
+        .select()
+        .eq('request_id', requestId)
+        .order('created_at', ascending: true);
+    return (data as List).cast<Map<String, dynamic>>();
   }
 }

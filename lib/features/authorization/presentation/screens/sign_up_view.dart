@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
@@ -90,7 +91,7 @@ class _SignUpViewState extends State<SignUpView> {
                 }
                 return SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.all(40.r),
+                    padding: EdgeInsets.all(30.r),
                     child: Column(
                       children: [
                         Align(
@@ -99,9 +100,23 @@ class _SignUpViewState extends State<SignUpView> {
                             icon: const Icon(Icons.arrow_back_ios),
                             onPressed: () =>
                                 _signUpPageController.previousPage(),
+                            color: AppTheme.darkGreyColor,
                           ),
                         ),
-                        SizedBox(height: 30.h),
+                        Image.asset(
+                              AppAssets.safeLinkLogo,
+                              width: 100.w,
+                              height: 100.h,
+                            )
+                            .animate()
+                            .fadeIn(duration: 600.ms)
+                            .scale(
+                              begin: const Offset(0.8, 0.8),
+                              end: const Offset(1.0, 1.0),
+                              duration: 600.ms,
+                              curve: Curves.easeOutBack,
+                            ),
+                        SizedBox(height: 15.h),
                         page,
                       ],
                     ),

@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safelink/core/constants/app_assets.dart';
-import 'package:safelink/core/services/cache_service.dart';
+import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
 import 'package:safelink/features/authorization/models/auth_models.dart';
@@ -23,21 +24,12 @@ class _SignInViewState extends State<SignInView> {
   final AuthController _authController = Get.find<AuthController>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _rememberMe = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadRememberedCredentials();
-  }
-
-  void _loadRememberedCredentials() {
-    final cache = CacheService.instance;
-    if (cache.isRememberMeEnabled) {
-      _emailController.text = cache.rememberedEmail ?? '';
-      _passwordController.text = cache.rememberedPassword ?? '';
-      setState(() => _rememberMe = true);
-    }
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -48,12 +40,26 @@ class _SignInViewState extends State<SignInView> {
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 100.h),
+            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 80.h),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Image.asset(
+                        AppAssets.safeLinkLogo,
+                        width: 100.w,
+                        height: 100.h,
+                      )
+                      .animate()
+                      .fadeIn(duration: 600.ms)
+                      .scale(
+                        begin: const Offset(0.8, 0.8),
+                        end: const Offset(1.0, 1.0),
+                        duration: 600.ms,
+                        curve: Curves.easeOutBack,
+                      ),
+                  SizedBox(height: 15.h),
                   Text(
                     'Login to Your Account',
                     style: theme.textTheme.titleLarge,
@@ -92,24 +98,10 @@ class _SignInViewState extends State<SignInView> {
                     },
                     icon: CupertinoIcons.lock,
                   ),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 25.h),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _rememberMe,
-                            onChanged: (value) {
-                              setState(() => _rememberMe = value ?? false);
-                            },
-                          ),
-                          Text(
-                            'Remember Me',
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
                       RichText(
                         text: TextSpan(
                           style: theme.textTheme.displayMedium,
@@ -125,7 +117,7 @@ class _SignInViewState extends State<SignInView> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20.h),
+                  SizedBox(height: 25.h),
                   CustomElevatedButton(
                     label: 'Sign In',
                     onPressed: () {
@@ -134,7 +126,6 @@ class _SignInViewState extends State<SignInView> {
                           SignInModel(
                             email: _emailController.text.trim(),
                             password: _passwordController.text,
-                            rememberMe: _rememberMe,
                           ),
                         );
                       }

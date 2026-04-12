@@ -1,50 +1,49 @@
 class AlertModel {
   final String id;
   final String title;
-  final String? description;
-  final String severity; // low, medium, high, critical
-  final String type; // flood, earthquake, fire, storm, other
+  final String description;
+  final String severity;
+  final String disasterType;
   final String? location;
   final double? latitude;
   final double? longitude;
-  final double? radiusKm;
+  final int radiusKm;
   final bool isActive;
   final String? issuedBy;
-  final String? expiresAt;
   final String? createdAt;
   final String? updatedAt;
 
   const AlertModel({
     required this.id,
     required this.title,
-    this.description,
+    required this.description,
     required this.severity,
-    required this.type,
+    required this.disasterType,
     this.location,
     this.latitude,
     this.longitude,
-    this.radiusKm,
+    this.radiusKm = 50,
     this.isActive = true,
     this.issuedBy,
-    this.expiresAt,
     this.createdAt,
     this.updatedAt,
   });
 
+  String get type => disasterType;
+
   factory AlertModel.fromJson(Map<String, dynamic> json) {
     return AlertModel(
       id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
       severity: json['severity'] as String? ?? 'low',
-      type: json['type'] as String? ?? 'other',
+      disasterType: json['disaster_type'] as String? ?? 'other',
       location: json['location'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      radiusKm: (json['radius_km'] as num?)?.toDouble(),
+      radiusKm: (json['radius_km'] as num?)?.toInt() ?? 50,
       isActive: json['is_active'] as bool? ?? true,
       issuedBy: json['issued_by'] as String?,
-      expiresAt: json['expires_at'] as String?,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );
@@ -56,14 +55,13 @@ class AlertModel {
       'title': title,
       'description': description,
       'severity': severity,
-      'type': type,
+      'disaster_type': disasterType,
       'location': location,
       'latitude': latitude,
       'longitude': longitude,
       'radius_km': radiusKm,
       'is_active': isActive,
       'issued_by': issuedBy,
-      'expires_at': expiresAt,
     };
   }
 

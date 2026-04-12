@@ -35,10 +35,6 @@ class SocialButton extends StatelessWidget {
               icon,
               width: theme.iconTheme.size,
               height: theme.iconTheme.size,
-              colorFilter: ColorFilter.mode(
-                theme.iconTheme.color!,
-                BlendMode.srcIn,
-              ),
             ),
             SizedBox(width: 15.w),
             Text(label, style: theme.textTheme.headlineLarge),

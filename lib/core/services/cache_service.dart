@@ -12,9 +12,6 @@ class CacheService {
   late SharedPreferences _prefs;
 
   /// KEYS
-  static const String _rememberMeKey = 'remember_me';
-  static const String _rememberedEmailKey = 'remembered_email';
-  static const String _rememberedPasswordKey = 'remembered_password';
   static const String _cachedProfileKey = 'cached_profile';
   static const String _cachedContactsKey = 'cached_emergency_contacts';
   static const String _onboardingCompleteKey = 'onboarding_complete';
@@ -22,34 +19,6 @@ class CacheService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-  }
-
-  /// REMEMBER ME
-
-  bool get isRememberMeEnabled => _prefs.getBool(_rememberMeKey) ?? false;
-
-  String? get rememberedEmail => _prefs.getString(_rememberedEmailKey);
-  String? get rememberedPassword => _prefs.getString(_rememberedPasswordKey);
-
-  Future<void> saveRememberMe({
-    required bool enabled,
-    String? email,
-    String? password,
-  }) async {
-    await _prefs.setBool(_rememberMeKey, enabled);
-    if (enabled && email != null && password != null) {
-      await _prefs.setString(_rememberedEmailKey, email);
-      await _prefs.setString(_rememberedPasswordKey, password);
-    } else {
-      await _prefs.remove(_rememberedEmailKey);
-      await _prefs.remove(_rememberedPasswordKey);
-    }
-  }
-
-  Future<void> clearRememberMe() async {
-    await _prefs.remove(_rememberMeKey);
-    await _prefs.remove(_rememberedEmailKey);
-    await _prefs.remove(_rememberedPasswordKey);
   }
 
   /// ONBOARDING
@@ -86,7 +55,8 @@ class CacheService {
   /// EMERGENCY CONTACTS CACHE
 
   Future<void> cacheEmergencyContacts(
-      List<EmergencyContactModel> contacts) async {
+    List<EmergencyContactModel> contacts,
+  ) async {
     final jsonList = contacts.map((c) => c.toJson()).toList();
     await _prefs.setString(_cachedContactsKey, jsonEncode(jsonList));
     await _updateCacheTimestamp();
@@ -123,7 +93,9 @@ class CacheService {
 
   Future<void> _updateCacheTimestamp() async {
     await _prefs.setInt(
-        _lastCacheTimeKey, DateTime.now().millisecondsSinceEpoch);
+      _lastCacheTimeKey,
+      DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   /// FULL CLEAR (ON SIGN-OUT)

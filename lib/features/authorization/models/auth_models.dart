@@ -8,6 +8,9 @@ class SignUpModel {
   final String password;
   final String dateOfBirth;
   final String phone;
+  final String? cnic;
+  final String? region;
+  final String? city;
   final File? profilePicture;
 
   const SignUpModel({
@@ -17,25 +20,22 @@ class SignUpModel {
     required this.password,
     required this.phone,
     required this.dateOfBirth,
+    this.cnic,
+    this.region,
+    this.city,
     this.profilePicture,
   });
 
-  Map<String, dynamic> toAuthMetadata() => {
-    'firstName': firstName.trim(),
-    'lastName': lastName.trim(),
-    'phone': phone,
-    'dateOfBirth': dateOfBirth,
-    'role': 'citizen',
-  };
+  String get fullName => '${firstName.trim()} ${lastName.trim()}'.trim();
 
-  Map<String, dynamic> toProfileInsert(String userId, String? avatarUrl) => {
-    'id': userId,
-    'first_name': firstName.trim(),
-    'last_name': lastName.trim(),
-    'email': email.trim(),
+  Map<String, dynamic> toAuthMetadata() => {
+    'role': 'citizen',
+    'full_name': fullName,
     'phone': phone,
     'date_of_birth': dateOfBirth,
-    if (avatarUrl != null) 'avatar_url': avatarUrl,
+    if (cnic != null && cnic!.isNotEmpty) 'cnic': cnic,
+    if (region != null && region!.isNotEmpty) 'region': region,
+    if (city != null && city!.isNotEmpty) 'city': city,
   };
 }
 

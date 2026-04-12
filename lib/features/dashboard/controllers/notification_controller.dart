@@ -4,7 +4,7 @@ import 'package:safelink/features/dashboard/services/notification_service.dart';
 
 class NotificationController extends GetxController {
   final NotificationService _notificationService =
-  Get.find<NotificationService>();
+      Get.find<NotificationService>();
 
   final isLoading = false.obs;
   final notifications = <NotificationModel>[].obs;
@@ -32,15 +32,10 @@ class NotificationController extends GetxController {
     try {
       await _notificationService.markAsRead(id);
       final idx = notifications.indexWhere((n) => n.id == id);
-      if (idx != -1) {
-        notifications[idx] = NotificationModel.fromJson({
-          ...notifications[idx].toJson(),
-          'id': notifications[idx].id,
-          'is_read': true,
-          'created_at': notifications[idx].createdAt,
-        });
+      if (idx != -1 && !notifications[idx].isRead) {
+        notifications[idx] = notifications[idx].copyWith(isRead: true);
+        unreadCount.value = (unreadCount.value - 1).clamp(0, 9999);
       }
-      unreadCount.value = (unreadCount.value - 1).clamp(0, 999);
     } catch (e) {
       Get.log('Error marking notification as read: $e');
     }

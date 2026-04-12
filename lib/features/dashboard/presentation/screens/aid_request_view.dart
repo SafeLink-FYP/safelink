@@ -19,17 +19,10 @@ class _AidRequestViewState extends State<AidRequestView> {
   final _addressController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
   String _selectedType = 'medical';
-  String _selectedUrgency = 'medium';
+  String _selectedUrgency = 'high';
 
-  final _types = [
-    'medical',
-    'food',
-    'shelter',
-    'clothing',
-    'water',
-    'other',
-  ];
-  final _urgencies = ['low', 'medium', 'high', 'critical'];
+  final _types = ['food', 'water', 'medical', 'rescue', 'other'];
+  final _urgencies = ['low', 'high', 'critical'];
 
   @override
   void dispose() {
@@ -86,27 +79,26 @@ class _AidRequestViewState extends State<AidRequestView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Aid Type',
-                          style: theme.textTheme.headlineMedium),
+                      Text('Aid Type', style: theme.textTheme.headlineMedium),
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 15.w),
                         decoration: BoxDecoration(
                           color: theme.inputDecorationTheme.fillColor,
                           borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(
-                            color: theme.colorScheme.outline,
-                          ),
+                          border: Border.all(color: theme.colorScheme.outline),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedType,
                             isExpanded: true,
                             items: _types
-                                .map((t) => DropdownMenuItem(
-                              value: t,
-                              child: Text(t.capitalizeFirst ?? t),
-                            ))
+                                .map(
+                                  (t) => DropdownMenuItem(
+                                    value: t,
+                                    child: Text(t.capitalizeFirst ?? t),
+                                  ),
+                                )
                                 .toList(),
                             onChanged: (v) =>
                                 setState(() => _selectedType = v!),
@@ -114,8 +106,7 @@ class _AidRequestViewState extends State<AidRequestView> {
                         ),
                       ),
                       SizedBox(height: 20.h),
-                      Text('Urgency',
-                          style: theme.textTheme.headlineMedium),
+                      Text('Urgency', style: theme.textTheme.headlineMedium),
                       SizedBox(height: 8.h),
                       Wrap(
                         spacing: 10.w,
@@ -124,16 +115,16 @@ class _AidRequestViewState extends State<AidRequestView> {
                           return ChoiceChip(
                             label: Text(u.capitalizeFirst ?? u),
                             selected: isSelected,
-                            selectedColor:
-                            _getUrgencyColor(u).withValues(alpha: 0.20),
+                            selectedColor: _getUrgencyColor(
+                              u,
+                            ).withValues(alpha: 0.20),
                             onSelected: (_) =>
                                 setState(() => _selectedUrgency = u),
                           );
                         }).toList(),
                       ),
                       SizedBox(height: 20.h),
-                      Text('Quantity',
-                          style: theme.textTheme.headlineMedium),
+                      Text('Quantity', style: theme.textTheme.headlineMedium),
                       SizedBox(height: 8.h),
                       TextFormField(
                         controller: _quantityController,
@@ -143,8 +134,10 @@ class _AidRequestViewState extends State<AidRequestView> {
                         ),
                       ),
                       SizedBox(height: 20.h),
-                      Text('Description',
-                          style: theme.textTheme.headlineMedium),
+                      Text(
+                        'Description',
+                        style: theme.textTheme.headlineMedium,
+                      ),
                       SizedBox(height: 8.h),
                       TextFormField(
                         controller: _descriptionController,
@@ -154,8 +147,10 @@ class _AidRequestViewState extends State<AidRequestView> {
                         ),
                       ),
                       SizedBox(height: 20.h),
-                      Text('Address / Location',
-                          style: theme.textTheme.headlineMedium),
+                      Text(
+                        'Address / Location',
+                        style: theme.textTheme.headlineMedium,
+                      ),
                       SizedBox(height: 8.h),
                       TextFormField(
                         controller: _addressController,
@@ -180,12 +175,15 @@ class _AidRequestViewState extends State<AidRequestView> {
   }
 
   void _submitRequest() {
+    final descText = _descriptionController.text.trim();
+    if (descText.isEmpty) {
+      Get.snackbar('Missing info', 'Please describe what you need.');
+      return;
+    }
     final controller = Get.find<AidRequestController>();
     controller.submitRequest(
-      type: _selectedType,
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
+      aidType: _selectedType,
+      description: descText,
       urgency: _selectedUrgency,
       quantity: int.tryParse(_quantityController.text.trim()) ?? 1,
       address: _addressController.text.trim().isEmpty
@@ -200,8 +198,6 @@ class _AidRequestViewState extends State<AidRequestView> {
         return AppTheme.red;
       case 'high':
         return AppTheme.orange;
-      case 'medium':
-        return AppTheme.primaryColor;
       default:
         return AppTheme.green;
     }

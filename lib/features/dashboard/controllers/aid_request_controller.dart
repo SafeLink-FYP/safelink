@@ -27,10 +27,12 @@ class AidRequestController extends GetxController {
   }
 
   Future<void> submitRequest({
-    required String type,
-    String? description,
+    required String aidType,
+    required String description,
     required String urgency,
     int quantity = 1,
+    int peopleAffected = 1,
+    List<String> imageUrls = const [],
     double? latitude,
     double? longitude,
     String? address,
@@ -38,10 +40,12 @@ class AidRequestController extends GetxController {
     try {
       DialogHelpers.showLoadingDialog();
       final request = await _service.createAidRequest(
-        type: type,
+        aidType: aidType,
         description: description,
         urgency: urgency,
         quantity: quantity,
+        peopleAffected: peopleAffected,
+        imageUrls: imageUrls,
         latitude: latitude,
         longitude: longitude,
         address: address,
@@ -78,6 +82,7 @@ class AidRequestController extends GetxController {
     }
   }
 
-  int get activeRequestCount =>
-      myRequests.where((r) => r.status == 'pending' || r.status == 'in_progress').length;
+  int get activeRequestCount => myRequests
+      .where((r) => r.status == 'pending' || r.status == 'in_progress')
+      .length;
 }

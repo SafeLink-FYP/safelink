@@ -41,6 +41,23 @@ class AlertController extends GetxController {
     }
   }
 
+  Future<void> loadAlertsForLocation(double latitude, double longitude) async {
+    isLoading.value = true;
+    try {
+      alerts.value = await _alertService.getAlertsForLocation(
+        latitude,
+        longitude,
+      );
+    } catch (e) {
+      Get.log('Error loading location alerts: $e — falling back to active');
+      try {
+        alerts.value = await _alertService.getActiveAlerts();
+      } catch (_) {}
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> viewAlert(String id) async {
     try {
       selectedAlert.value = await _alertService.getAlertById(id);
@@ -62,10 +79,8 @@ class AlertController extends GetxController {
         return 'assets/icons/Droplets-Icon.svg';
       case 'earthquake':
         return 'assets/icons/Wave-Icon.svg';
-      case 'fire':
+      case 'medical':
         return 'assets/icons/Warning-Icon.svg';
-      case 'storm':
-        return 'assets/icons/Wave-Icon.svg';
       default:
         return 'assets/icons/Warning-Icon.svg';
     }

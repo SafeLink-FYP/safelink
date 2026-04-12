@@ -7,11 +7,17 @@ import 'package:safelink/features/dashboard/presentation/screens/aid_request_vie
 import 'package:safelink/features/dashboard/presentation/screens/aid_requests_list_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/alert_detail_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/alerts_list_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/case_detail_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/case_tracking_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/emergency_contacts_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/home_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/main_dashboard_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/map_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/notifications_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/preparedness_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/report_incident_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/safety_tips_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/settings_view.dart';
 import 'package:safelink/features/profile/presentation/screens/edit_profile_view.dart';
 import 'package:safelink/features/profile/presentation/screens/profile_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/s_o_s_view.dart';
@@ -37,6 +43,12 @@ class AppRoutes {
   static const chatView = '/chatView';
   static const mapView = '/mapView';
   static const mainDashboardView = '/mainDashboardView';
+  static const safetyTipsView = '/safetyTipsView';
+  static const preparednessView = '/preparednessView';
+  static const reportIncidentView = '/reportIncidentView';
+  static const settingsView = '/settingsView';
+  static const caseTrackingView = '/caseTrackingView';
+  static const caseDetailView = '/caseDetailView';
 
   static final routes = [
     GetPage(name: splashView, page: () => const SplashView()),
@@ -60,5 +72,11 @@ class AppRoutes {
     GetPage(name: chatView, page: () => const ChatView()),
     GetPage(name: mapView, page: () => const MapView()),
     GetPage(name: mainDashboardView, page: () => const MainDashboardView()),
+    GetPage(name: safetyTipsView, page: () => const SafetyTipsView()),
+    GetPage(name: preparednessView, page: () => const PreparednessView()),
+    GetPage(name: reportIncidentView, page: () => const ReportIncidentView()),
+    GetPage(name: settingsView, page: () => const SettingsView()),
+    GetPage(name: caseTrackingView, page: () => const CaseTrackingView()),
+    GetPage(name: caseDetailView, page: () => const CaseDetailView()),
   ];
 }

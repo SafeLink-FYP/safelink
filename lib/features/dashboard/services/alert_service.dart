@@ -14,18 +14,28 @@ class AlertService extends GetxService {
   }
 
   Future<List<AlertModel>> getAllAlerts() async {
-    final data = await _supabase.alerts
-        .select()
-        .order('created_at', ascending: false);
+    final data = await _supabase.alerts.select().order(
+      'created_at',
+      ascending: false,
+    );
     return (data as List).map((e) => AlertModel.fromJson(e)).toList();
   }
 
   Future<AlertModel?> getAlertById(String id) async {
-    final data = await _supabase.alerts
-        .select()
-        .eq('id', id)
-        .maybeSingle();
+    final data = await _supabase.alerts.select().eq('id', id).maybeSingle();
     if (data == null) return null;
     return AlertModel.fromJson(data);
+  }
+
+  Future<List<AlertModel>> getAlertsForLocation(
+    double latitude,
+    double longitude,
+  ) async {
+    final data = await _supabase.rpc(
+      'get_active_alerts_for_location',
+      params: {'p_lat': latitude, 'p_lng': longitude},
+    );
+    if (data == null) return [];
+    return (data as List).map((e) => AlertModel.fromJson(e)).toList();
   }
 }

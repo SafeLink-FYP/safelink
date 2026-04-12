@@ -117,7 +117,7 @@ class AlertDetailView extends StatelessWidget {
                         icon: Icons.location_on,
                       ),
                     if (alert.location != null) SizedBox(height: 15.h),
-                    if (alert.description != null) ...[
+                    if (alert.description.isNotEmpty) ...[
                       Text('Description', style: theme.textTheme.headlineLarge),
                       SizedBox(height: 10.h),
                       Container(
@@ -132,7 +132,7 @@ class AlertDetailView extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          alert.description!,
+                          alert.description,
                           style: theme.textTheme.bodyMedium,
                         ),
                       ),
@@ -145,15 +145,6 @@ class AlertDetailView extends StatelessWidget {
                         value: alert.issuedBy!,
                         icon: Icons.person,
                       ),
-                    if (alert.expiresAt != null) ...[
-                      SizedBox(height: 15.h),
-                      _buildInfoSection(
-                        theme: theme,
-                        title: 'Expires',
-                        value: alert.expiresAt!,
-                        icon: Icons.access_time,
-                      ),
-                    ],
                     SizedBox(height: 25.h),
                     Container(
                       width: double.infinity,

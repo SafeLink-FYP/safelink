@@ -43,6 +43,8 @@ class MyApp extends StatelessWidget {
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
                 themeMode: controller.themeMode,
+                defaultTransition: Transition.fadeIn,
+                transitionDuration: const Duration(milliseconds: 300),
                 initialBinding: InitialBindings(),
                 initialRoute: AppRoutes.splashView,
                 getPages: AppRoutes.routes,

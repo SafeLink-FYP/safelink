@@ -8,34 +8,28 @@ class SOSService extends GetxService {
   Future<SOSRequestModel> createSOSRequest({
     required double latitude,
     required double longitude,
-    required String type,
+    required SOSType disasterType,
     String? address,
     String? description,
     String urgency = 'critical',
     int peopleCount = 1,
   }) async {
-    try {
-      final userId = _supabase.userId!;
-
-      final data = await _supabase.sosRequests
-          .insert({
-            'user_id': userId,
-            'latitude': latitude,
-            'longitude': longitude,
-            'type': type,
-            'address': address,
-            'description': description,
-            'urgency': urgency,
-            'status': 'pending',
-            'people_count': peopleCount,
-          })
-          .select()
-          .single();
-      return SOSRequestModel.fromJson(data);
-    } catch (e) {
-      print("SOS ERROR: $e");
-      rethrow;
-    }
+    final userId = _supabase.userId!;
+    final data = await _supabase.sosRequests
+        .insert({
+          'user_id': userId,
+          'disaster_type': disasterType.name,
+          'description': description,
+          'urgency': urgency,
+          'status': 'pending',
+          'latitude': latitude,
+          'longitude': longitude,
+          'address': address,
+          'people_count': peopleCount,
+        })
+        .select()
+        .single();
+    return SOSRequestModel.fromJson(data);
   }
 
   Future<List<SOSRequestModel>> getMySOSRequests() async {
@@ -56,6 +50,7 @@ class SOSService extends GetxService {
         .eq('user_id', userId)
         .inFilter('status', ['pending', 'responded'])
         .order('created_at', ascending: false)
+        .limit(1)
         .maybeSingle();
     if (data == null) return null;
     return SOSRequestModel.fromJson(data);
