@@ -7,12 +7,12 @@ import 'package:safelink/features/authorization/controllers/auth_controller.dart
 import 'package:safelink/features/authorization/controllers/image_picking_controller.dart';
 import 'package:safelink/features/dashboard/controllers/aid_request_controller.dart';
 import 'package:safelink/features/profile/controllers/profile_controller.dart';
-import 'package:safelink/features/profile/presentation/widgets/contact_information.dart';
+import 'package:safelink/features/profile/presentation/widgets/contact_information_card.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
 import 'package:safelink/features/dashboard/presentation/widgets/profile_pin.dart';
 import 'package:safelink/features/dashboard/presentation/widgets/recent_case.dart';
 import 'package:safelink/core/widgets/profile_avatar.dart';
-import 'package:safelink/features/profile/presentation/widgets/settings.dart';
+import 'package:safelink/features/profile/presentation/widgets/settings_card.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -134,7 +134,7 @@ class _ProfileViewState extends State<ProfileView> {
                       style: theme.textTheme.headlineLarge,
                     ),
                     SizedBox(height: 25.h),
-                    ContactInformation(),
+                    ContactInformationCard(),
                     SizedBox(height: 25.h),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,7 +191,7 @@ class _ProfileViewState extends State<ProfileView> {
                     SizedBox(height: 25.h),
                     Text('Settings', style: theme.textTheme.headlineLarge),
                     SizedBox(height: 25.h),
-                    Settings(),
+                    SettingsCard(),
                     SizedBox(height: 25.h),
                     InkWell(
                       onTap: () => _authController.signOut(),

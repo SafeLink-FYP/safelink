@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 
-class Settings extends StatelessWidget {
-  const Settings({super.key});
+class SettingsCard extends StatelessWidget {
+  const SettingsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class Settings extends StatelessWidget {
             onTap: () => Get.toNamed('/settingsView'),
             borderRadius: BorderRadius.circular(10.r),
             child: _buildSettingTile(
-              label: 'More Settings',
+              label: 'App Settings',
               leadingIcon: AppAssets.settingsIcon,
               trailing: Icon(Icons.chevron_right, color: theme.iconTheme.color),
               context: context,

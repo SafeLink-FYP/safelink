@@ -7,14 +7,14 @@ import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/custom_divider.dart';
 import 'package:safelink/features/profile/controllers/profile_controller.dart';
 
-class ContactInformation extends StatefulWidget {
-  const ContactInformation({super.key});
+class ContactInformationCard extends StatefulWidget {
+  const ContactInformationCard({super.key});
 
   @override
-  State<ContactInformation> createState() => _ContactInformationState();
+  State<ContactInformationCard> createState() => _ContactInformationCardState();
 }
 
-class _ContactInformationState extends State<ContactInformation> {
+class _ContactInformationCardState extends State<ContactInformationCard> {
   final ProfileController profileController = Get.find<ProfileController>();
 
   @override
