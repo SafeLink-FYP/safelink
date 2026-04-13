@@ -57,11 +57,12 @@ class _EditProfileViewState extends State<EditProfileView> {
     final updates = <String, dynamic>{};
     final profile = _profileController.profile.value;
 
-    if (_firstNameController.text.trim() != (profile?.firstName ?? '')) {
-      updates['first_name'] = _firstNameController.text.trim();
-    }
-    if (_lastNameController.text.trim() != (profile?.lastName ?? '')) {
-      updates['last_name'] = _lastNameController.text.trim();
+    final newFullName = [
+      _firstNameController.text.trim(),
+      _lastNameController.text.trim(),
+    ].where((s) => s.isNotEmpty).join(' ');
+    if (newFullName != (profile?.fullName ?? '')) {
+      updates['full_name'] = newFullName;
     }
     if (_phoneController.text.trim() != (profile?.phone ?? '')) {
       updates['phone'] = _phoneController.text.trim();

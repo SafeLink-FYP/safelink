@@ -106,11 +106,26 @@ class _ProfileViewState extends State<ProfileView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        ProfilePin(label: 'Active Requests', count: 2),
+                        Obx(
+                          () => ProfilePin(
+                            label: 'Active Requests',
+                            count: _profileController.activeRequestCount.value,
+                          ),
+                        ),
                         SizedBox(width: 10.w),
-                        ProfilePin(label: 'Alerts Received', count: 5),
+                        Obx(
+                          () => ProfilePin(
+                            label: 'Alerts Received',
+                            count: _profileController.alertsReceivedCount.value,
+                          ),
+                        ),
                         SizedBox(width: 10.w),
-                        ProfilePin(label: 'Days \nSafe', count: 12),
+                        Obx(
+                          () => ProfilePin(
+                            label: 'Days \nSafe',
+                            count: _profileController.daysSafe.value,
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 25.h),
@@ -129,7 +144,7 @@ class _ProfileViewState extends State<ProfileView> {
                           style: theme.textTheme.headlineLarge,
                         ),
                         InkWell(
-                          onTap: () => Get.toNamed('/aidRequestsListView'),
+                          onTap: () => Get.toNamed('/caseTrackingView'),
                           child: Text(
                             'View All',
                             style: theme.textTheme.displayMedium,

@@ -30,6 +30,7 @@ class ProfileController extends GetxController {
           daysSafe.value = DateTime.now().difference(createdAt).inDays;
         }
       }
+      await loadCitizenSummary();
     } catch (e) {
       Get.log('Error loading profile: $e');
     } finally {
@@ -40,18 +41,7 @@ class ProfileController extends GetxController {
   Future<void> updateProfile(Map<String, dynamic> updates) async {
     try {
       final updated = await _profileService.updateProfile(updates);
-      profile.value = profile.value?.copyWith(
-        firstName: updated.firstName,
-        lastName: updated.lastName,
-        phone: updated.phone,
-        dateOfBirth: updated.dateOfBirth,
-        avatarUrl: updated.avatarUrl,
-        city: updated.city,
-        province: updated.province,
-        latitude: updated.latitude,
-        longitude: updated.longitude,
-      ) ??
-          updated;
+      profile.value = updated;
       Get.snackbar('Success', 'Profile updated successfully');
     } catch (e) {
       Get.log('Error updating profile: $e');
@@ -59,12 +49,28 @@ class ProfileController extends GetxController {
     }
   }
 
+  Future<void> loadCitizenSummary() async {
+    try {
+      final data = await _profileService.getCitizenSummary();
+      if (data == null) return;
+      final activeSos = (data['active_sos'] as num?)?.toInt() ?? 0;
+      final activeAid = (data['active_aid_requests'] as num?)?.toInt() ?? 0;
+      activeRequestCount.value = activeSos + activeAid;
+      alertsReceivedCount.value =
+          (data['alerts_received'] as num?)?.toInt() ?? 0;
+      daysSafe.value =
+          (data['days_since_joined'] as num?)?.toInt() ?? daysSafe.value;
+    } catch (e) {
+      Get.log('Error loading citizen summary: $e');
+    }
+  }
+
   Future<void> uploadAvatar(Uint8List fileBytes) async {
     isUploadingAvatar.value = true;
     try {
       final updated = await _profileService.uploadAvatar(fileBytes);
-      profile.value = profile.value?.copyWith(avatarUrl: updated.avatarUrl) ??
-          updated;
+      profile.value =
+          profile.value?.copyWith(avatarUrl: updated.avatarUrl) ?? updated;
     } catch (e) {
       Get.log('Error uploading avatar: $e');
       Get.snackbar('Error', 'Failed to upload profile picture');

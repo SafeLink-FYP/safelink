@@ -1,93 +1,119 @@
 class ProfileModel {
   final String id;
-  final String firstName;
-  final String lastName;
+  final String role;
+  final String fullName;
   final String email;
   final String? phone;
+  final String? cnic;
   final String? dateOfBirth;
   final String? avatarUrl;
+  final String? region;
   final String? city;
-  final String? province;
   final double? latitude;
   final double? longitude;
   final String? createdAt;
+  final String? updatedAt;
 
   const ProfileModel({
     required this.id,
-    required this.firstName,
-    required this.lastName,
+    this.role = 'citizen',
+    required this.fullName,
     required this.email,
     this.phone,
+    this.cnic,
     this.dateOfBirth,
     this.avatarUrl,
+    this.region,
     this.city,
-    this.province,
     this.latitude,
     this.longitude,
     this.createdAt,
+    this.updatedAt,
   });
+
+  String get firstName {
+    final parts = fullName.trim().split(RegExp(r'\s+'));
+    return parts.isNotEmpty ? parts.first : '';
+  }
+
+  String get lastName {
+    final parts = fullName.trim().split(RegExp(r'\s+'));
+    return parts.length > 1 ? parts.skip(1).join(' ') : '';
+  }
+
+  String get displayName => fullName.trim().isNotEmpty ? fullName : email;
+
+  bool get isCitizen => role == 'citizen';
+  bool get isGovOfficial => role == 'gov_official';
+  bool get isAidWorker => role == 'aid_worker';
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
       id: json['id'] as String,
-      firstName: json['first_name'] as String,
-      lastName: json['last_name'] as String,
-      email: json['email'] as String,
+      role: json['role'] as String? ?? 'citizen',
+      fullName: json['full_name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
       phone: json['phone'] as String?,
-      dateOfBirth: json['date_of_birth'] as String?,
+      cnic: json['cnic'] as String?,
+      dateOfBirth: json['date_of_birth']?.toString(),
       avatarUrl: json['avatar_url'] as String?,
+      region: json['region'] as String?,
       city: json['city'] as String?,
-      province: json['province'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      createdAt: json['created_at'] as String?,
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'first_name': firstName,
-      'last_name': lastName,
+      'role': role,
+      'full_name': fullName,
       'email': email,
       'phone': phone,
+      'cnic': cnic,
       'date_of_birth': dateOfBirth,
       'avatar_url': avatarUrl,
+      'region': region,
       'city': city,
-      'province': province,
       'latitude': latitude,
       'longitude': longitude,
-      'created_at': createdAt,
     };
   }
 
   ProfileModel copyWith({
     String? id,
-    String? firstName,
-    String? lastName,
+    String? role,
+    String? fullName,
     String? email,
     String? phone,
+    String? cnic,
     String? dateOfBirth,
     String? avatarUrl,
+    String? region,
     String? city,
-    String? province,
     double? latitude,
     double? longitude,
     String? createdAt,
+    String? updatedAt,
   }) {
     return ProfileModel(
       id: id ?? this.id,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
+      role: role ?? this.role,
+      fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       phone: phone ?? this.phone,
+      cnic: cnic ?? this.cnic,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      region: region ?? this.region,
       city: city ?? this.city,
-      province: province ?? this.province,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

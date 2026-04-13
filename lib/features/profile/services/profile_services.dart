@@ -29,15 +29,31 @@ class ProfileService extends GetxService {
     return ProfileModel.fromJson(data);
   }
 
+  Future<Map<String, dynamic>?> getCitizenSummary() async {
+    final userId = _supabase.userId;
+    if (userId == null) return null;
+    final data = await _supabase.rpc(
+      'get_citizen_summary',
+      params: {'p_user_id': userId},
+    );
+    if (data == null) return null;
+    return Map<String, dynamic>.from(data as Map);
+  }
+
   Future<ProfileModel> uploadAvatar(Uint8List fileBytes) async {
     final userId = _supabase.userId!;
     final path = 'avatars/$userId.jpg';
 
-    await _supabase.storage.from('avatars').uploadBinary(
-      path,
-      fileBytes,
-      fileOptions: const FileOptions(upsert: true, contentType: 'image/jpeg'),
-    );
+    await _supabase.storage
+        .from('avatars')
+        .uploadBinary(
+          path,
+          fileBytes,
+          fileOptions: const FileOptions(
+            upsert: true,
+            contentType: 'image/jpeg',
+          ),
+        );
 
     final url = _supabase.storage.from('avatars').getPublicUrl(path);
 
@@ -63,8 +79,8 @@ class ProfileService extends GetxService {
   }
 
   Future<EmergencyContactModel> addEmergencyContact(
-      Map<String, dynamic> contact,
-      ) async {
+    Map<String, dynamic> contact,
+  ) async {
     contact['user_id'] = _supabase.userId!;
     final data = await _supabase.emergencyContacts
         .insert(contact)

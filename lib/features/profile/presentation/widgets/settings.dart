@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
-import 'package:safelink/features/profile/presentation/widgets/theme_toggle.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
@@ -34,11 +34,15 @@ class Settings extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildSettingTile(
-            label: 'Theme',
-            leadingIcon: AppAssets.settingsIcon,
-            trailing: ThemeToggle(),
-            context: context,
+          InkWell(
+            onTap: () => Get.toNamed('/settingsView'),
+            borderRadius: BorderRadius.circular(10.r),
+            child: _buildSettingTile(
+              label: 'More Settings',
+              leadingIcon: AppAssets.settingsIcon,
+              trailing: Icon(Icons.chevron_right, color: theme.iconTheme.color),
+              context: context,
+            ),
           ),
         ],
       ),
