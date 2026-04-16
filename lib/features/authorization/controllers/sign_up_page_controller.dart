@@ -5,6 +5,8 @@ class SignUpPageController extends GetxController {
   final RxInt currentPage = 0.obs;
   final PageController pageController = PageController();
 
+  RxBool isTermsAccepted = false.obs;
+
   final RxBool hasMinLength = false.obs;
   final RxBool hasUppercase = false.obs;
   final RxBool hasNumber = false.obs;

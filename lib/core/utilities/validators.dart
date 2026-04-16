@@ -100,43 +100,19 @@ class Validators {
       return 'Please enter your date of birth';
     }
 
-    final parts = dateOfBirth.split(' ');
-    final day = int.parse(parts[0]);
-    final monthStr = parts[1].replaceAll(',', '');
-    final year = int.parse(parts[2]);
-
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    final month = monthNames.indexOf(monthStr) + 1;
-    final dob = DateTime(year, month, day);
+    final dob = DateTime.tryParse(dateOfBirth);
+    if (dob == null) return 'Please enter a valid date of birth';
 
     final today = DateTime.now();
-    final age =
-        today.year -
-            dob.year -
-            ((today.month < dob.month ||
-                (today.month == dob.month && today.day < dob.day))
-                ? 1
-                : 0);
+    final age = today.year -
+        dob.year -
+        ((today.month < dob.month ||
+            (today.month == dob.month && today.day < dob.day))
+            ? 1
+            : 0);
 
-    if (dob.isAfter(today)) {
-      return 'Date of birth cannot be in the future';
-    }
-    if (age < 18) {
-      return 'You must be at least 18 years old';
-    }
+    if (dob.isAfter(today)) return 'Date of birth cannot be in the future';
+    if (age < 18) return 'You must be at least 18 years old';
 
     return null;
   }

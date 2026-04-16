@@ -39,7 +39,7 @@ class _SignInViewState extends State<SignInView> {
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 80.h),
+            padding: EdgeInsets.symmetric(vertical: 80.h, horizontal: 30.w),
             child: Form(
               key: _formKey,
               child: Column(

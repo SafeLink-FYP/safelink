@@ -63,67 +63,65 @@ class _SignUpViewState extends State<SignUpView> {
       body: SafeArea(
         child: Form(
           key: _formKey,
-          child: Flexible(
-            child: PageView.builder(
-              itemCount: 4,
-              physics: NeverScrollableScrollPhysics(),
-              controller: _signUpPageController.pageController,
-              onPageChanged: (value) =>
-                  _signUpPageController.currentPage.value = value,
-              itemBuilder: (context, index) {
-                Widget page;
-                switch (index) {
-                  case 0:
-                    page = _buildEmailStep(theme);
-                    break;
-                  case 1:
-                    page = _buildDetailsStep(theme);
-                    break;
-                  case 2:
-                    page = _buildPasswordStep(theme);
-                    break;
-                  case 3:
-                    page = _buildProfilePictureStep(theme);
-                    break;
-                  default:
-                    page = SizedBox.shrink();
-                    break;
-                }
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.all(30.r),
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: IconButton(
-                            icon: const Icon(Icons.arrow_back_ios),
-                            onPressed: () =>
-                                _signUpPageController.previousPage(),
-                            color: AppTheme.darkGreyColor,
-                          ),
+          child: PageView.builder(
+            itemCount: 4,
+            physics: BouncingScrollPhysics(),
+            controller: _signUpPageController.pageController,
+            onPageChanged: (value) =>
+                _signUpPageController.currentPage.value = value,
+            itemBuilder: (context, index) {
+              Widget page;
+              switch (index) {
+                case 0:
+                  page = _buildEmailStep(theme);
+                  break;
+                case 1:
+                  page = _buildDetailsStep(theme);
+                  break;
+                case 2:
+                  page = _buildPasswordStep(theme);
+                  break;
+                case 3:
+                  page = _buildProfilePictureStep(theme);
+                  break;
+                default:
+                  page = SizedBox.shrink();
+                  break;
+              }
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(30.r),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back_ios),
+                          onPressed: () =>
+                              _signUpPageController.previousPage(),
+                          color: AppTheme.darkGreyColor,
                         ),
-                        Image.asset(
-                              AppAssets.safeLinkLogo,
-                              width: 100.w,
-                              height: 100.h,
-                            )
-                            .animate()
-                            .fadeIn(duration: 600.ms)
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1.0, 1.0),
-                              duration: 600.ms,
-                              curve: Curves.easeOutBack,
-                            ),
-                        SizedBox(height: 15.h),
-                        page,
-                      ],
-                    ),
+                      ),
+                      Image.asset(
+                            AppAssets.safeLinkLogo,
+                            width: 100.w,
+                            height: 100.h,
+                          )
+                          .animate()
+                          .fadeIn(duration: 600.ms)
+                          .scale(
+                            begin: const Offset(0.8, 0.8),
+                            end: const Offset(1.0, 1.0),
+                            duration: 600.ms,
+                            curve: Curves.easeOutBack,
+                          ),
+                      SizedBox(height: 15.h),
+                      page,
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),

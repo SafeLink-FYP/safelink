@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 import 'package:get/get.dart';
+import 'package:safelink/features/authorization/services/auth_service.dart';
 import 'package:safelink/features/profile/models/profile_model.dart';
 import 'package:safelink/features/profile/services/profile_services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileController extends GetxController {
   final ProfileService _profileService = Get.find<ProfileService>();
@@ -17,6 +19,21 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     loadProfile();
+    _listenToAuthChanges();
+  }
+
+  void _listenToAuthChanges() {
+    final auth = Get.find<AuthService>();
+    auth.authStateChanges.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn) {
+        loadProfile();
+      } else if (data.event == AuthChangeEvent.signedOut) {
+        profile.value = null;
+        activeRequestCount.value = 0;
+        alertsReceivedCount.value = 0;
+        daysSafe.value = 0;
+      }
+    });
   }
 
   Future<void> loadProfile() async {

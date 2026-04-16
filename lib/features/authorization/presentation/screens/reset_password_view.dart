@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -117,19 +116,6 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                         );
                       }
                     },
-                  ),
-                  SizedBox(height: 25.h),
-                  RichText(
-                    text: TextSpan(
-                      style: theme.textTheme.bodyMedium,
-                      children: [
-                        TextSpan(
-                          text: 'Back to Login',
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => Get.offAndToNamed('signInView'),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),
