@@ -27,7 +27,6 @@ class SegmentedFilterBar extends StatelessWidget {
       child: Row(
         children: filters.map((filter) {
           final isSelected = selectedFilter == filter;
-
           return Expanded(
             child: GestureDetector(
               onTap: () => onFilterSelected(filter),

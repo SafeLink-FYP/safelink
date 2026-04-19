@@ -89,7 +89,6 @@ class _SignUpViewState extends State<SignUpView> {
                   break;
               }
               return SingleChildScrollView(
-                child: Padding(
                   padding: EdgeInsets.all(30.r),
                   child: Column(
                     children: [
@@ -119,7 +118,6 @@ class _SignUpViewState extends State<SignUpView> {
                       page,
                     ],
                   ),
-                ),
               );
             },
           ),

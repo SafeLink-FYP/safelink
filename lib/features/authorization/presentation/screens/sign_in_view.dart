@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safelink/core/constants/app_assets.dart';
+import 'package:safelink/core/widgets/custom_divider.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
 import 'package:safelink/features/authorization/models/auth_models.dart';
@@ -133,40 +134,12 @@ class _SignInViewState extends State<SignInView> {
                   SizedBox(height: 30.h),
                   Row(
                     children: [
-                      Expanded(
-                        child: Container(
-                          height: 0.5.h,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.grey[900]!,
-                                Colors.grey[100]!,
-                                Colors.grey[900]!,
-                              ],
-                              stops: const [0.0, 0.5, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
+                      Expanded(child: CustomDivider()),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 25.w),
                         child: Text('OR', style: theme.textTheme.bodyLarge),
                       ),
-                      Expanded(
-                        child: Container(
-                          height: 0.5.h,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.grey[900]!,
-                                Colors.grey[100]!,
-                                Colors.grey[900]!,
-                              ],
-                              stops: const [0.0, 0.5, 1.0],
-                            ),
-                          ),
-                        ),
-                      ),
+                      Expanded(child: CustomDivider()),
                     ],
                   ),
                   SizedBox(height: 30.h),
