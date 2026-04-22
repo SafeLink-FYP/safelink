@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:safelink/core/services/supabase_service.dart';
-import 'package:safelink/features/dashboard/models/disaster_report_model.dart';
+import 'package:safelink/features/aid/models/disaster_report_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DisasterReportService extends GetxService {

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:safelink/core/utilities/dialog_helpers.dart';
-import 'package:safelink/features/dashboard/models/s_o_s_request_model.dart';
-import 'package:safelink/features/dashboard/services/s_o_s_service.dart';
+import 'package:safelink/features/aid/models/s_o_s_request_model.dart';
+import 'package:safelink/features/aid/services/s_o_s_service.dart';
 import 'package:safelink/features/profile/controllers/profile_controller.dart';
 
 class SOSController extends GetxController {

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:safelink/core/utilities/dialog_helpers.dart';
-import 'package:safelink/features/dashboard/models/disaster_report_model.dart';
-import 'package:safelink/features/dashboard/services/disaster_report_service.dart';
+import 'package:safelink/features/aid/models/disaster_report_model.dart';
+import 'package:safelink/features/aid/services/disaster_report_service.dart';
 import 'package:safelink/features/profile/controllers/profile_controller.dart';
 
 class DisasterReportController extends GetxController {

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:safelink/core/utilities/dialog_helpers.dart';
-import 'package:safelink/features/dashboard/models/aid_request_model.dart';
-import 'package:safelink/features/dashboard/services/aid_request_service.dart';
+import 'package:safelink/features/aid/models/aid_request_model.dart';
+import 'package:safelink/features/aid/services/aid_request_service.dart';
 
 class AidRequestController extends GetxController {
   final AidRequestService _service = Get.find<AidRequestService>();

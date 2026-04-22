@@ -2,9 +2,9 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:safelink/features/chatbot/presentation/screens/chat_view.dart';
 import 'package:safelink/features/dashboard/controllers/navigation_controller.dart';
-import 'package:safelink/features/dashboard/presentation/screens/home_view.dart';
+import 'package:safelink/features/dashboard/presentation/screens/dashboard_view.dart';
 import 'package:safelink/features/dashboard/presentation/screens/map_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/s_o_s_view.dart';
+import 'package:safelink/features/aid/presentation/screens/s_o_s_view.dart';
 import 'package:safelink/features/dashboard/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'package:safelink/features/profile/presentation/screens/profile_view.dart';
 

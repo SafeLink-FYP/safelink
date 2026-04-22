@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
-import 'package:safelink/features/dashboard/controllers/disaster_report_controller.dart';
+import 'package:safelink/features/aid/controllers/disaster_report_controller.dart';
 
 class ReportIncidentView extends StatefulWidget {
   const ReportIncidentView({super.key});

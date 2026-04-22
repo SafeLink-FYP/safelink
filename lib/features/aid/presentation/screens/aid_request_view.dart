@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
-import 'package:safelink/features/dashboard/controllers/aid_request_controller.dart';
+import 'package:safelink/features/aid/controllers/aid_request_controller.dart';
 
 class AidRequestView extends StatefulWidget {
   const AidRequestView({super.key});

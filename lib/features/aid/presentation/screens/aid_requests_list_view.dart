@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
-import 'package:safelink/features/dashboard/controllers/aid_request_controller.dart';
+import 'package:safelink/features/aid/controllers/aid_request_controller.dart';
 
 class AidRequestsListView extends StatelessWidget {
   const AidRequestsListView({super.key});
@@ -128,13 +128,12 @@ class AidRequestsListView extends StatelessWidget {
                                   ],
                                 ),
                                 SizedBox(height: 4.h),
-                                if (request.description != null)
-                                  Text(
-                                    request.description!,
-                                    style: theme.textTheme.bodySmall,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                Text(
+                                  request.description,
+                                  style: theme.textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                                 SizedBox(height: 2.h),
                                 Text(
                                   request.timeAgo,

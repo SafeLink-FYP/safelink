@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:safelink/core/services/supabase_service.dart';
-import 'package:safelink/features/dashboard/models/s_o_s_request_model.dart';
+import 'package:safelink/features/aid/models/s_o_s_request_model.dart';
 
 class SOSService extends GetxService {
   final _supabase = SupabaseService.instance;

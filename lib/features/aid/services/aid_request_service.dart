@@ -1,5 +1,5 @@
 import 'package:safelink/core/services/supabase_service.dart';
-import 'package:safelink/features/dashboard/models/aid_request_model.dart';
+import 'package:safelink/features/aid/models/aid_request_model.dart';
 import 'package:get/get.dart';
 
 class AidRequestService extends GetxService {

@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/controllers/theme_controller.dart';
+import 'package:safelink/core/routing/app_pages.dart';
 import 'package:safelink/core/secrets/app_secrets.dart';
 import 'package:safelink/core/services/cache_service.dart';
-import 'package:safelink/core/services/initial_bindings.dart';
+import 'package:safelink/core/di/initial_bindings.dart';
 import 'package:safelink/core/themes/app_theme.dart';
-import 'package:safelink/core/utilities/app_routes.dart';
+import 'package:safelink/core/routing/app_routes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
                 transitionDuration: const Duration(milliseconds: 300),
                 initialBinding: InitialBindings(),
                 initialRoute: AppRoutes.splashView,
-                getPages: AppRoutes.routes,
+                getPages: AppPages.pages,
               );
             });
           },
