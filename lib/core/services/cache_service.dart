@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:safelink/features/profile/models/profile_model.dart';
-import 'package:safelink/features/dashboard/models/emergency_contact_model.dart';
+import 'package:safelink/shared/models/emergency_contact_model.dart';
 
 class CacheService {
   static final CacheService _instance = CacheService._internal();

@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:get/get.dart';
-import 'package:safelink/features/dashboard/models/emergency_contact_model.dart';
 import 'package:safelink/features/profile/models/profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:safelink/core/services/supabase_service.dart';
+import 'package:safelink/shared/models/emergency_contact_model.dart';
 
 class ProfileService extends GetxService {
   final _supabase = SupabaseService.instance;

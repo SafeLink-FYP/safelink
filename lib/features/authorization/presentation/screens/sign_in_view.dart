@@ -5,6 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safelink/core/constants/app_assets.dart';
+import 'package:safelink/core/routing/app_routes.dart';
+import 'package:safelink/core/utilities/dialog_helpers.dart';
 import 'package:safelink/core/widgets/custom_divider.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
@@ -67,7 +69,7 @@ class _SignInViewState extends State<SignInView> {
                   ),
                   SizedBox(height: 15.h),
                   Text(
-                    'Access your disaster relief dashboard and updates.',
+                    'Access your disaster relief app_shell and updates.',
                     style: theme.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -110,7 +112,7 @@ class _SignInViewState extends State<SignInView> {
                               text: 'Forgot Password?',
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () =>
-                                    Get.toNamed('resetPasswordView'),
+                                    Get.toNamed(AppRoutes.resetPasswordView),
                             ),
                           ],
                         ),
@@ -120,14 +122,24 @@ class _SignInViewState extends State<SignInView> {
                   SizedBox(height: 25.h),
                   CustomElevatedButton(
                     label: 'Sign In',
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        _authController.signIn(
+                        DialogHelpers.showLoadingDialog();
+                        final result = await _authController.signIn(
                           SignInModel(
                             email: _emailController.text.trim(),
                             password: _passwordController.text,
                           ),
                         );
+                        DialogHelpers.hideLoadingDialog();
+                        if (result.isSuccess) {
+                          Get.offAllNamed(AppRoutes.mainDashboardView);
+                        } else {
+                          DialogHelpers.showFailure(
+                            title: 'Sign In Failed',
+                            message: result.message ?? 'Unable to sign in.',
+                          );
+                        }
                       }
                     },
                   ),
@@ -146,7 +158,15 @@ class _SignInViewState extends State<SignInView> {
                   SocialButton(
                     label: 'Continue with Google',
                     icon: AppAssets.googleIcon,
-                    onPressed: () => _authController.signInWithGoogle(),
+                    onPressed: () async {
+                      final result = await _authController.signInWithGoogle();
+                      if (!result.isSuccess) {
+                        DialogHelpers.showFailure(
+                          title: 'Error',
+                          message: result.message ?? 'Google sign-in failed.',
+                        );
+                      }
+                    },
                   ),
                   SizedBox(height: 30.h),
                   RichText(
@@ -158,7 +178,7 @@ class _SignInViewState extends State<SignInView> {
                           text: 'Sign Up',
                           style: theme.textTheme.displayLarge,
                           recognizer: TapGestureRecognizer()
-                            ..onTap = () => Get.toNamed('signUpView'),
+                            ..onTap = () => Get.toNamed(AppRoutes.signUpView),
                         ),
                       ],
                     ),

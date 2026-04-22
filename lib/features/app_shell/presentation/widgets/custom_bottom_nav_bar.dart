@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
-import 'package:safelink/features/dashboard/controllers/navigation_controller.dart';
+import 'package:safelink/features/app_shell/controllers/navigation_controller.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   const CustomBottomNavBar({super.key});
@@ -12,7 +12,7 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final NavigationController navController = Get.put(NavigationController());
+    final NavigationController navController = Get.find<NavigationController>();
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,

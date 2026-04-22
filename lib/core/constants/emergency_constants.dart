@@ -1,4 +1,4 @@
-import 'package:safelink/features/dashboard/models/emergency_contact_model.dart';
+import 'package:safelink/shared/models/emergency_contact_model.dart';
 
 final List<EmergencyContactModel> predefinedEmergencyContacts = [
   EmergencyContactModel(

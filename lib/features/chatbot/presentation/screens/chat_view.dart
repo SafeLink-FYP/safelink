@@ -6,6 +6,7 @@ import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
 import 'package:safelink/features/chatbot/controllers/chat_controller.dart';
+import 'package:safelink/features/chatbot/services/chatbot_service.dart';
 import 'package:safelink/features/chatbot/presentation/widgets/chat_bubble.dart';
 import 'package:safelink/features/chatbot/presentation/widgets/quick_action.dart';
 
@@ -17,7 +18,9 @@ class ChatView extends StatefulWidget {
 }
 
 class _ChatViewState extends State<ChatView> {
-  final ChatController _chatController = Get.put(ChatController());
+  final ChatController _chatController = Get.put(
+    ChatController(chatService: Get.find<ChatbotService>()),
+  );
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();

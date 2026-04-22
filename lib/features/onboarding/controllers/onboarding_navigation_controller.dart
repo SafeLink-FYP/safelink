@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:safelink/core/routing/app_routes.dart';
 
 class OnboardingNavigationController extends GetxController {
   final PageController pageController = PageController();
@@ -7,7 +8,7 @@ class OnboardingNavigationController extends GetxController {
 
   void nextPage() {
     if (currentPage.value == 2) {
-      Get.offAllNamed('signInView');
+      Get.offAllNamed(AppRoutes.signInView);
     } else {
       pageController.nextPage(
         duration: Duration(milliseconds: 300),
@@ -17,6 +18,6 @@ class OnboardingNavigationController extends GetxController {
   }
 
   void skip() {
-    Get.offAllNamed('signInView');
+    Get.offAllNamed(AppRoutes.signInView);
   }
 }

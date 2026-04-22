@@ -7,12 +7,13 @@ import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/animated_press_effect.dart';
-import 'package:safelink/features/dashboard/controllers/alert_controller.dart';
-import 'package:safelink/features/dashboard/controllers/navigation_controller.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/active_alert.dart';
+import 'package:safelink/features/alerts/controllers/alert_controller.dart';
+import 'package:safelink/features/app_shell/controllers/navigation_controller.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/glass_container.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/home_quick_action.dart';
+import 'package:safelink/features/app_shell/presentation/widgets/glass_container.dart';
+import 'package:safelink/features/app_shell/presentation/widgets/home_quick_action.dart';
+import 'package:safelink/core/routing/app_routes.dart';
+import 'package:safelink/shared/home/alerts_home_section.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -60,7 +61,7 @@ class _HomeViewState extends State<HomeView> {
                           ],
                         ),
                         AnimatedPressEffect(
-                          onTap: () => Get.toNamed('notificationsView'),
+                          onTap: () => Get.toNamed(AppRoutes.notificationsView),
                           child: Stack(
                             children: [
                               Container(
@@ -280,98 +281,11 @@ class _HomeViewState extends State<HomeView> {
                       ],
                     ).animate().fadeIn(duration: 400.ms, delay: 600.ms),
                     SizedBox(height: 25.h),
-                    Obx(() {
-                      if (alertController.isLoading.value) {
-                        return Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(20.r),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.w,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppTheme.primaryColor,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      if (alertController.alerts.isEmpty) {
-                        return Container(
-                          padding: EdgeInsets.all(20.r),
-                          decoration: BoxDecoration(
-                            color: AppTheme.green.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(15.r),
-                            border: Border.all(
-                              color: AppTheme.green.withValues(alpha: 0.20),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: AppTheme.green,
-                                size: 25.sp,
-                              ),
-                              SizedBox(width: 10.w),
-                              Text(
-                                'No active alerts in your area',
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  color: AppTheme.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ).animate().fadeIn(duration: 400.ms, delay: 700.ms);
-                      }
-                      return Column(
-                        children: alertController.alerts
-                            .take(3)
-                            .toList()
-                            .asMap()
-                            .entries
-                            .map(
-                              (entry) =>
-                                  Padding(
-                                        padding: EdgeInsets.only(bottom: 10.h),
-                                        child: AnimatedPressEffect(
-                                          onTap: () => Get.toNamed(
-                                            '/alertDetailView',
-                                            arguments: entry.value,
-                                          ),
-                                          child: ActiveAlert(
-                                            label: entry.value.title,
-                                            location:
-                                                entry.value.location ??
-                                                'Unknown',
-                                            time: entry.value.timeAgo,
-                                            alertLevel:
-                                                entry
-                                                    .value
-                                                    .severity
-                                                    .capitalizeFirst ??
-                                                'Low',
-                                            icon: alertController.getAlertIcon(
-                                              entry.value.type,
-                                            ),
-                                            iconColor: _getSeverityColor(
-                                              entry.value.severity,
-                                            ),
-                                            iconBackgroundColor:
-                                                _getSeverityBgColor(
-                                                  entry.value.severity,
-                                                ),
-                                          ),
-                                        ),
-                                      )
-                                      .animate()
-                                      .fadeIn(
-                                        duration: 400.ms,
-                                        delay: (700 + entry.key * 100).ms,
-                                      )
-                                      .slideY(begin: 0.10, end: 0),
-                            )
-                            .toList(),
-                      );
-                    }),
+                    AlertsHomeSection(
+                      alertController: alertController,
+                      severityColor: _getSeverityColor,
+                      severityBgColor: _getSeverityBgColor,
+                    ).animate().fadeIn(duration: 400.ms, delay: 700.ms),
                     SizedBox(height: 25.h),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

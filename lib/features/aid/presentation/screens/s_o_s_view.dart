@@ -6,10 +6,10 @@ import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/constants/emergency_constants.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/utilities/dialog_helpers.dart';
-import 'package:safelink/features/dashboard/controllers/emergency_contact_controller.dart';
+import 'package:safelink/shared/controllers/emergency_contact_controller.dart';
 import 'package:safelink/features/aid/controllers/s_o_s_controller.dart';
 import 'package:safelink/features/aid/models/s_o_s_request_model.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/emergency_contact.dart';
+import 'package:safelink/shared/widgets/emergency_contact_tile.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
 import 'package:safelink/features/profile/controllers/profile_controller.dart';
 
@@ -224,7 +224,7 @@ class _SOSViewState extends State<SOSView> {
                             .map(
                               (c) => Padding(
                                 padding: EdgeInsets.only(bottom: 15.h),
-                                child: EmergencyContact(
+                                child: EmergencyContactTile(
                                   label: c.name,
                                   description: c.phone,
                                 ),

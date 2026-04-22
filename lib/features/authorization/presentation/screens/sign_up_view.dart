@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/core/routing/app_routes.dart';
+import 'package:safelink/core/utilities/dialog_helpers.dart';
 import 'package:safelink/core/utilities/validators.dart';
 import 'package:safelink/core/widgets/profile_avatar.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
@@ -200,7 +202,15 @@ class _SignUpViewState extends State<SignUpView> {
         SocialButton(
           label: 'Continue with Google',
           icon: AppAssets.googleIcon,
-          onPressed: () => _authController.signInWithGoogle(),
+          onPressed: () async {
+            final result = await _authController.signInWithGoogle();
+            if (!result.isSuccess) {
+              DialogHelpers.showFailure(
+                title: 'Error',
+                message: result.message ?? 'Google sign-in failed.',
+              );
+            }
+          },
         ),
         SizedBox(height: 30.h),
         RichText(
@@ -212,7 +222,7 @@ class _SignUpViewState extends State<SignUpView> {
                 text: 'Sign In',
                 style: theme.textTheme.displayLarge,
                 recognizer: TapGestureRecognizer()
-                  ..onTap = () => Get.offAndToNamed('signInView'),
+                  ..onTap = () => Get.offAndToNamed(AppRoutes.signInView),
               ),
             ],
           ),
@@ -444,20 +454,36 @@ class _SignUpViewState extends State<SignUpView> {
         SizedBox(height: 30.h),
         CustomElevatedButton(
           label: 'Complete Registration',
-          onPressed: () => _authController.signUp(
-            SignUpModel(
-              firstName: _firstNameController.text.trim(),
-              lastName: _lastNameController.text.trim(),
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-              phone: _phoneController.text.trim(),
-              dateOfBirth: _dobController.text.trim(),
-              profilePicture:
-                  _imagePickingController.selectedImage.value != null
-                  ? File(_imagePickingController.selectedImage.value!.path)
-                  : null,
-            ),
-          ),
+          onPressed: () async {
+            DialogHelpers.showLoadingDialog();
+            final result = await _authController.signUp(
+              SignUpModel(
+                firstName: _firstNameController.text.trim(),
+                lastName: _lastNameController.text.trim(),
+                email: _emailController.text.trim(),
+                password: _passwordController.text,
+                phone: _phoneController.text.trim(),
+                dateOfBirth: _dobController.text.trim(),
+                profilePicture:
+                    _imagePickingController.selectedImage.value != null
+                    ? File(_imagePickingController.selectedImage.value!.path)
+                    : null,
+              ),
+            );
+            DialogHelpers.hideLoadingDialog();
+            if (result.isSuccess) {
+              DialogHelpers.showSuccess(
+                title: 'Success',
+                message: result.message ?? 'Account created successfully!',
+              );
+              Get.offAllNamed(AppRoutes.signInView);
+            } else {
+              DialogHelpers.showFailure(
+                title: 'Sign Up Failed',
+                message: result.message ?? 'Unable to sign up.',
+              );
+            }
+          },
         ),
         SizedBox(height: 10.h),
         TextButton(

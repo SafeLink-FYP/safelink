@@ -3,7 +3,10 @@ import '../models/chat_models.dart';
 import '../services/chatbot_service.dart';
 
 class ChatController extends GetxController {
-  final ChatbotService _chatService = ChatbotService();
+  final ChatbotService _chatService;
+
+  ChatController({ChatbotService? chatService})
+      : _chatService = chatService ?? Get.find<ChatbotService>();
 
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
   final RxBool isLoading = false.obs;

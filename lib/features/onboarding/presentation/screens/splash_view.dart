@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
+import 'package:safelink/core/routing/app_routes.dart';
 import 'package:safelink/core/services/cache_service.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
@@ -30,14 +31,14 @@ class _SplashViewState extends State<SplashView> {
 
     final hasSession = await authController.checkSession();
     if (hasSession) {
-      Get.offAllNamed('mainDashboardView');
+      Get.offAllNamed(AppRoutes.mainDashboardView);
       return;
     }
 
     if (cache.isOnboardingComplete) {
-      Get.offAllNamed('signInView');
+      Get.offAllNamed(AppRoutes.signInView);
     } else {
-      Get.offAllNamed('onboardingView');
+      Get.offAllNamed(AppRoutes.onboardingView);
     }
   }
 

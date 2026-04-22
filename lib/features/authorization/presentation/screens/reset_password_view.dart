@@ -4,7 +4,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
+import 'package:safelink/core/routing/app_routes.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/core/utilities/dialog_helpers.dart';
 import 'package:safelink/core/utilities/validators.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/core/widgets/custom_elevated_button.dart';
@@ -107,13 +109,29 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                   SizedBox(height: 35.h),
                   CustomElevatedButton(
                     label: 'Send Reset Link',
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        _authController.resetPassword(
+                        DialogHelpers.showLoadingDialog();
+                        final result = await _authController.resetPassword(
                           ResetPasswordModel(
                             email: _emailController.text.trim(),
                           ),
                         );
+                        DialogHelpers.hideLoadingDialog();
+                        if (result.isSuccess) {
+                          DialogHelpers.showSuccess(
+                            title: 'Email Sent',
+                            message:
+                                result.message ??
+                                'Check your email for reset instructions.',
+                          );
+                          Get.offAllNamed(AppRoutes.signInView);
+                        } else {
+                          DialogHelpers.showFailure(
+                            title: 'Error',
+                            message: result.message ?? 'Reset failed.',
+                          );
+                        }
                       }
                     },
                   ),

@@ -7,23 +7,23 @@ import 'package:safelink/features/authorization/presentation/screens/sign_up_vie
 import 'package:safelink/features/chatbot/presentation/screens/chat_view.dart';
 import 'package:safelink/features/aid/presentation/screens/aid_request_view.dart';
 import 'package:safelink/features/aid/presentation/screens/aid_requests_list_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/alert_detail_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/alerts_list_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/case_detail_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/case_tracking_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/emergency_contacts_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/dashboard_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/main_dashboard_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/map_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/notifications_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/preparedness_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/safety_tips_view.dart';
-import 'package:safelink/features/dashboard/presentation/screens/settings_view.dart';
+import 'package:safelink/features/alerts/presentation/screens/alert_detail_view.dart';
+import 'package:safelink/features/alerts/presentation/screens/alerts_list_view.dart';
+import 'package:safelink/features/cases/presentation/screens/case_detail_view.dart';
+import 'package:safelink/features/cases/presentation/screens/case_tracking_view.dart';
+import 'package:safelink/features/app_shell/presentation/screens/dashboard_view.dart';
+import 'package:safelink/features/app_shell/presentation/screens/main_dashboard_view.dart';
+import 'package:safelink/features/notifications/presentation/screens/notifications_view.dart';
 import 'package:safelink/features/profile/presentation/screens/edit_profile_view.dart';
 import 'package:safelink/features/profile/presentation/screens/profile_view.dart';
 import 'package:safelink/features/aid/presentation/screens/s_o_s_view.dart';
 import 'package:safelink/features/onboarding/presentation/screens/onboarding_view.dart';
 import 'package:safelink/features/onboarding/presentation/screens/splash_view.dart';
+import 'package:safelink/features/settings/presentation/screens/settings_view.dart';
+import 'package:safelink/features/preparedness/presentation/screens/preparedness_view.dart';
+import 'package:safelink/features/preparedness/presentation/screens/safety_tips_view.dart';
+import 'package:safelink/features/map/presentation/screens/map_view.dart';
+import 'package:safelink/features/emergency_contacts/presentation/screens/emergency_contacts_view.dart';
 
 class AppPages {
   static final pages = <GetPage>[

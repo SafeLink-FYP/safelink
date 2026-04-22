@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/core/utilities/dialog_helpers.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/features/authorization/controllers/image_picking_controller.dart';
 import 'package:safelink/features/aid/controllers/aid_request_controller.dart';
 import 'package:safelink/features/profile/controllers/profile_controller.dart';
 import 'package:safelink/features/profile/presentation/widgets/contact_information_card.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/profile_pin.dart';
-import 'package:safelink/features/dashboard/presentation/widgets/recent_case.dart';
+import 'package:safelink/features/app_shell/presentation/widgets/profile_pin.dart';
+import 'package:safelink/features/cases/presentation/widgets/recent_case.dart';
 import 'package:safelink/core/widgets/profile_avatar.dart';
 import 'package:safelink/features/profile/presentation/widgets/settings_card.dart';
+import 'package:safelink/core/routing/app_routes.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -71,7 +73,7 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     SizedBox(height: 15.h),
                     InkWell(
-                      onTap: () => Get.toNamed('editProfileView'),
+                      onTap: () => Get.toNamed(AppRoutes.editProfileView),
                       borderRadius: BorderRadius.circular(10.r),
                       child: Container(
                         padding: EdgeInsets.symmetric(
@@ -194,7 +196,19 @@ class _ProfileViewState extends State<ProfileView> {
                     SettingsCard(),
                     SizedBox(height: 25.h),
                     InkWell(
-                      onTap: () => _authController.signOut(),
+                      onTap: () async {
+                        DialogHelpers.showLoadingDialog();
+                        final result = await _authController.signOut();
+                        DialogHelpers.hideLoadingDialog();
+                        if (result.isSuccess) {
+                          Get.offAllNamed(AppRoutes.signInView);
+                        } else {
+                          DialogHelpers.showFailure(
+                            title: 'Log Out Failed',
+                            message: result.message ?? 'Unable to log out',
+                          );
+                        }
+                      },
                       borderRadius: BorderRadius.circular(10.r),
                       child: Container(
                         width: double.infinity,
