@@ -65,41 +65,54 @@ class ActiveAlert extends StatelessWidget {
             ),
           ),
           SizedBox(width: 10.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(label, style: theme.textTheme.headlineMedium),
-                  SizedBox(width: 25.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 5.h,
-                      horizontal: 10.w,
-                    ),
-                    decoration: BoxDecoration(
-                      color: iconBackgroundColor,
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: iconColor.withValues(alpha: 0.10),
-                        width: 1.w,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: theme.textTheme.headlineMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    child: Text(
-                      alertLevel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: iconColor,
+                    SizedBox(width: 8.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 5.h,
+                        horizontal: 10.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: iconBackgroundColor,
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: iconColor.withValues(alpha: 0.10),
+                          width: 1.w,
+                        ),
+                      ),
+                      child: Text(
+                        alertLevel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: iconColor,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 5.h),
-              Text('$location, $time', style: theme.textTheme.bodySmall),
-            ],
+                  ],
+                ),
+                SizedBox(height: 5.h),
+                Text(
+                  '$location, $time',
+                  style: theme.textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-          Spacer(),
+          SizedBox(width: 8.w),
           InkWell(
             onTap: () {},
             child: Icon(Icons.arrow_forward_ios, size: 15.sp),

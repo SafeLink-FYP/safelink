@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:safelink/features/alerts/controllers/alert_controller.dart';
+import 'package:safelink/features/dashboard/controllers/ml_alert_controller.dart';
+import 'package:safelink/features/dashboard/services/ml_alert_service.dart';
 import 'package:safelink/features/authorization/data/repositories/auth_repository.dart';
 import 'package:safelink/features/authorization/controllers/auth_controller.dart';
 import 'package:safelink/features/authorization/controllers/image_picking_controller.dart';
@@ -53,6 +55,7 @@ class InitialBindings extends Bindings {
       PreparednessRepository(Get.find<PreparednessStateService>()),
       permanent: true,
     );
+    Get.put<MlAlertService>(MlAlertService(), permanent: true);
 
     /// CONTROLLERS
     Get.put<AuthController>(
@@ -62,6 +65,7 @@ class InitialBindings extends Bindings {
     Get.put<ProfileController>(ProfileController(), permanent: true);
     Get.put<ImagePickingController>(ImagePickingController(), permanent: true);
     Get.put<SOSController>(SOSController(), permanent: true);
+    Get.put<MlAlertController>(MlAlertController(), permanent: true);
     Get.put<AlertController>(AlertController(), permanent: true);
     Get.put<NotificationController>(NotificationController(), permanent: true);
     Get.put<EmergencyContactController>(

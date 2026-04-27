@@ -7,8 +7,8 @@ import 'package:get/get.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
 import 'package:safelink/core/widgets/animated_press_effect.dart';
-import 'package:safelink/features/alerts/controllers/alert_controller.dart';
 import 'package:safelink/features/app_shell/controllers/navigation_controller.dart';
+import 'package:safelink/features/dashboard/controllers/ml_alert_controller.dart';
 import 'package:safelink/core/widgets/gradient_header.dart';
 import 'package:safelink/features/app_shell/presentation/widgets/glass_container.dart';
 import 'package:safelink/features/app_shell/presentation/widgets/home_quick_action.dart';
@@ -25,7 +25,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final NavigationController navigationController =
       Get.find<NavigationController>();
-  final AlertController alertController = Get.find<AlertController>();
+  final MlAlertController mlController = Get.find<MlAlertController>();
 
   @override
   Widget build(BuildContext context) {
@@ -282,9 +282,7 @@ class _HomeViewState extends State<HomeView> {
                     ).animate().fadeIn(duration: 400.ms, delay: 600.ms),
                     SizedBox(height: 25.h),
                     AlertsHomeSection(
-                      alertController: alertController,
-                      severityColor: _getSeverityColor,
-                      severityBgColor: _getSeverityBgColor,
+                      mlController: mlController,
                     ).animate().fadeIn(duration: 400.ms, delay: 700.ms),
                     SizedBox(height: 25.h),
                     Row(
@@ -383,25 +381,4 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Color _getSeverityColor(String severity) {
-    switch (severity.toLowerCase()) {
-      case 'critical':
-        return AppTheme.red;
-      case 'medium':
-        return AppTheme.orange;
-      default:
-        return AppTheme.primaryColor;
-    }
-  }
-
-  Color _getSeverityBgColor(String severity) {
-    switch (severity.toLowerCase()) {
-      case 'critical':
-        return AppTheme.lightRed;
-      case 'medium':
-        return AppTheme.lightOrange;
-      default:
-        return const Color(0xFFEFF6FF);
-    }
-  }
 }

@@ -3,6 +3,9 @@
         android:label="Safelink"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCsueqtapmCDSxSW5u-E5nZk3QBoyj3RgU" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
