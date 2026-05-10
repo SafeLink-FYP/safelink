@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safelink/core/themes/app_theme.dart';
+
+// Wired by ChatView in Phase 4 (offline parity overhaul). Intentionally kept
+// in the codebase even though Phase 1 doesn't render it yet — do not delete
+// during unrelated cleanup.
+class OfflineBanner extends StatelessWidget {
+  final void Function()? onTap;
+  const OfflineBanner({super.key, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
+        color: AppTheme.orange.withValues(alpha: 0.1),
+        child: Row(
+          children: [
+            Icon(Icons.cloud_off, size: 16.sp, color: AppTheme.orange),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                'Offline mode - Tap to reconnect',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.orange,
+                ),
+              ),
+            ),
+            Icon(Icons.refresh, size: 16.sp, color: AppTheme.orange),
+          ],
+        ),
+      ),
+    );
+  }
+}

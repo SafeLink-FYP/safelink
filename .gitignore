@@ -1,0 +1,72 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Maps API key storage — never commit. See android/key.properties.example.
+/android/local.properties
+/android/key.properties
+
+# Schema lives in the project-root supabase/ folder, not per-app.
+# Block accidental re-adds from `supabase init` / `supabase link` invoked here.
+/supabase/
+
+# Flutter command logs (e.g. flutter_01.log) — *.log already covers these,
+# this rule is defense-in-depth for files anchored at app root.
+/flutter_*.log
+
+# Claude Code settings
+/.claude/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+backend/.venv/
+backend/.venv311/
+/backup/app_secrets.dart
+
+# Nested separate repo - managed independently
+chatbot_backend/

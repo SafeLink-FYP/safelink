@@ -1,0 +1,11 @@
+# Copy this file to `key.properties` (same directory) and fill in the value.
+# `key.properties` is gitignored — never commit the real key.
+#
+# The Android Google Maps SDK reads this via the manifest placeholder
+# `${MAPS_API_KEY}`, wired in android/app/build.gradle.kts.
+#
+# Restrict this key in Google Cloud Console:
+#   - Application restriction: Android apps → package `com.example.safelink`
+#     + your debug + release SHA-1 fingerprints.
+#   - API restriction: Maps SDK for Android only.
+MAPS_API_KEY=YOUR_ANDROID_MAPS_API_KEY
