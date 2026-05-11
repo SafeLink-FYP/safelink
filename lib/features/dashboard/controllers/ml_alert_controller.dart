@@ -32,13 +32,23 @@ class MlAlertController extends GetxController {
   double _lat = 30.3753;
   double _lng = 69.3451;
 
-  // Public read-only getters so peer controllers (e.g. AlertController for
-  // gov alerts) can reuse the resolved location without each duplicating
-  // the Geolocator init dance. Caller should check hasUserLocation.value
-  // before deciding whether to feed these into a location-filtered query
-  // vs falling back to country-wide.
-  double get lat => _lat;
-  double get lng => _lng;
+  // Optional explicit location for the flood forecast. When non-null, the
+  // forecast endpoint is queried at this point instead of the user's GPS
+  // position. Set via [setFloodLocationOverride] from the map UI.
+  final floodLocationLabel = RxnString();
+  double? _floodOverrideLat;
+  double? _floodOverrideLng;
+
+  void setFloodLocationOverride({
+    String? label,
+    double? latitude,
+    double? longitude,
+  }) {
+    floodLocationLabel.value = label;
+    _floodOverrideLat = latitude;
+    _floodOverrideLng = longitude;
+    loadFloodForecast(selectedDate.value);
+  }
 
   @override
   void onInit() {
@@ -164,8 +174,8 @@ class MlAlertController extends GetxController {
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       floodForecast.value = await _service.getFloodForecast(
         dateStr,
-        latitude: _lat,
-        longitude: _lng,
+        latitude: _floodOverrideLat ?? _lat,
+        longitude: _floodOverrideLng ?? _lng,
       );
     } catch (e) {
       Get.log('MlAlertController: forecast error — $e');

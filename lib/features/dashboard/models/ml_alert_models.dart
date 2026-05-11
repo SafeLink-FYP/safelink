@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 class AftershockModel {
   final int rank;
   final double magnitude;
@@ -5,6 +7,7 @@ class AftershockModel {
   final double longitude;
   final double depthKm;
   final double confidence;
+  final double affectedRadiusKm;
 
   const AftershockModel({
     required this.rank,
@@ -13,20 +16,31 @@ class AftershockModel {
     required this.longitude,
     required this.depthKm,
     required this.confidence,
+    required this.affectedRadiusKm,
   });
 
   int get likelihoodPercent => (confidence * 100).round();
 
   factory AftershockModel.fromJson(Map<String, dynamic> json) {
+    final mag = (json['magnitude'] as num).toDouble();
     return AftershockModel(
       rank: (json['rank'] as num).toInt(),
-      magnitude: (json['magnitude'] as num).toDouble(),
+      magnitude: mag,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       depthKm: (json['depth_km'] as num).toDouble(),
       confidence: (json['confidence'] as num).toDouble(),
+      affectedRadiusKm: (json['affected_radius_km'] as num?)?.toDouble() ??
+          _fallbackAffectedRadiusKm(mag),
     );
   }
+}
+
+double _fallbackAffectedRadiusKm(double magnitude) {
+  // Mirrors the backend's Bakun-Wentworth-style relation; used only when an
+  // older response is missing the `affected_radius_km` field.
+  final r = math.pow(10, 0.5 * magnitude - 0.5).toDouble();
+  return r.clamp(8.0, 200.0);
 }
 
 class EarthquakeAlertModel {
@@ -97,6 +111,11 @@ class FloodAlertModel {
   final List<String> affectedAreas;
   final bool shouldAlert;
   final String? dataDate;
+  // Breakdown of how the risk score was assembled. Per-signal saturation
+  // values are 0–100. Empty when an older / fallback response omits them.
+  final Map<String, double> signals;
+  final double anomalyFactor; // climatology multiplier; 1.0 = neutral
+  final String zone; // flood-mechanism zone label, e.g. "Indus Floodplain"
 
   const FloodAlertModel({
     required this.riskLevel,
@@ -105,11 +124,21 @@ class FloodAlertModel {
     required this.affectedAreas,
     required this.shouldAlert,
     this.dataDate,
+    this.signals = const {},
+    this.anomalyFactor = 1.0,
+    this.zone = '',
   });
 
   int get riskPercent => riskScore.round();
 
   factory FloodAlertModel.fromJson(Map<String, dynamic> json) {
+    final raw = json['signals'];
+    final signals = <String, double>{};
+    if (raw is Map) {
+      raw.forEach((k, v) {
+        if (v is num) signals[k.toString()] = v.toDouble();
+      });
+    }
     return FloodAlertModel(
       riskLevel: json['risk_level'] as String? ?? 'LOW',
       riskScore: (json['risk_score'] as num?)?.toDouble() ?? 0,
@@ -118,6 +147,9 @@ class FloodAlertModel {
           (json['affected_areas'] as List? ?? []).cast<String>(),
       shouldAlert: json['should_alert'] as bool? ?? false,
       dataDate: json['data_date'] as String?,
+      signals: signals,
+      anomalyFactor: (json['anomaly_factor'] as num?)?.toDouble() ?? 1.0,
+      zone: json['zone'] as String? ?? '',
     );
   }
 }

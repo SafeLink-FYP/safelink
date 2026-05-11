@@ -6,8 +6,106 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:safelink/core/constants/app_assets.dart';
 import 'package:safelink/core/themes/app_theme.dart';
+import 'package:safelink/features/app_shell/controllers/navigation_controller.dart';
 import 'package:safelink/features/dashboard/controllers/ml_alert_controller.dart';
 import 'package:safelink/features/dashboard/models/ml_alert_models.dart';
+import 'package:safelink/features/dashboard/presentation/screens/earthquake_alert_detail_view.dart';
+
+enum _MapLayer { flood, earthquake }
+
+enum _EarthquakeSort { time, magnitude, distance }
+
+class _FloodLocation {
+  final String name;
+  final String province;
+  final double latitude;
+  final double longitude;
+  const _FloodLocation(this.name, this.province, this.latitude, this.longitude);
+}
+
+class _BreakdownEntry {
+  final String label;
+  final String subtitle;
+  final double value; // 0–100
+  const _BreakdownEntry(this.label, this.subtitle, this.value);
+}
+
+// Pakistani cities offered as flood-forecast targets. Coordinates +
+// provinces mirror the backend's pakistan_geo.py / flood_service.py
+// lookup tables so the forecast picks up the right per-city anchor
+// weights and per-province alert thresholds.
+const List<_FloodLocation> _pakistanCities = [
+  // Punjab
+  _FloodLocation('Attock', 'Punjab', 33.77, 72.36),
+  _FloodLocation('Bahawalpur', 'Punjab', 29.39, 71.68),
+  _FloodLocation('Dera Ghazi Khan', 'Punjab', 30.06, 70.63),
+  _FloodLocation('Faisalabad', 'Punjab', 31.42, 73.08),
+  _FloodLocation('Gujranwala', 'Punjab', 32.16, 74.19),
+  _FloodLocation('Jhelum', 'Punjab', 32.94, 73.73),
+  _FloodLocation('Kasur', 'Punjab', 31.12, 74.45),
+  _FloodLocation('Khanewal', 'Punjab', 30.30, 71.93),
+  _FloodLocation('Lahore', 'Punjab', 31.55, 74.35),
+  _FloodLocation('Lodhran', 'Punjab', 29.55, 71.62),
+  _FloodLocation('Mianwali', 'Punjab', 32.58, 71.53),
+  _FloodLocation('Multan', 'Punjab', 30.19, 71.47),
+  _FloodLocation('Muzaffargarh', 'Punjab', 30.07, 71.19),
+  _FloodLocation('Rajanpur', 'Punjab', 29.10, 70.33),
+  _FloodLocation('Rawalpindi', 'Punjab', 33.60, 73.04),
+  _FloodLocation('Sargodha', 'Punjab', 32.08, 72.67),
+  _FloodLocation('Sialkot', 'Punjab', 32.49, 74.53),
+  _FloodLocation('Vehari', 'Punjab', 30.04, 72.34),
+
+  // Sindh
+  _FloodLocation('Badin', 'Sindh', 24.65, 68.84),
+  _FloodLocation('Dadu', 'Sindh', 26.73, 67.78),
+  _FloodLocation('Hyderabad', 'Sindh', 25.39, 68.37),
+  _FloodLocation('Jacobabad', 'Sindh', 28.28, 68.44),
+  _FloodLocation('Karachi', 'Sindh', 24.86, 67.01),
+  _FloodLocation('Larkana', 'Sindh', 27.56, 68.22),
+  _FloodLocation('Mirpurkhas', 'Sindh', 25.53, 69.01),
+  _FloodLocation('Nawabshah', 'Sindh', 26.24, 68.41),
+  _FloodLocation('Sehwan', 'Sindh', 26.43, 67.87),
+  _FloodLocation('Sukkur', 'Sindh', 27.71, 68.86),
+  _FloodLocation('Thatta', 'Sindh', 24.75, 67.92),
+
+  // KPK
+  _FloodLocation('Abbottabad', 'KPK', 34.15, 73.22),
+  _FloodLocation('Bannu', 'KPK', 32.99, 70.61),
+  _FloodLocation('Charsadda', 'KPK', 34.15, 71.73),
+  _FloodLocation('Chitral', 'KPK', 35.85, 71.83),
+  _FloodLocation('Dir', 'KPK', 35.21, 71.88),
+  _FloodLocation('Kohat', 'KPK', 33.58, 71.44),
+  _FloodLocation('Mansehra', 'KPK', 34.33, 73.20),
+  _FloodLocation('Mardan', 'KPK', 34.20, 72.04),
+  _FloodLocation('Mingora', 'KPK', 34.78, 72.36),
+  _FloodLocation('Nowshera', 'KPK', 34.01, 71.98),
+  _FloodLocation('Peshawar', 'KPK', 34.01, 71.57),
+  _FloodLocation('Swabi', 'KPK', 34.12, 72.47),
+  _FloodLocation('Swat', 'KPK', 35.22, 72.42),
+
+  // Balochistan
+  _FloodLocation('Gwadar', 'Balochistan', 25.12, 62.33),
+  _FloodLocation('Jafferabad', 'Balochistan', 28.34, 68.28),
+  _FloodLocation('Kalat', 'Balochistan', 29.00, 66.57),
+  _FloodLocation('Khuzdar', 'Balochistan', 27.82, 66.61),
+  _FloodLocation('Naseerabad', 'Balochistan', 28.42, 67.92),
+  _FloodLocation('Quetta', 'Balochistan', 30.18, 67.00),
+  _FloodLocation('Turbat', 'Balochistan', 26.00, 63.05),
+  _FloodLocation('Zhob', 'Balochistan', 31.34, 69.45),
+
+  // Gilgit-Baltistan
+  _FloodLocation('Gilgit', 'Gilgit-Baltistan', 35.92, 74.31),
+  _FloodLocation('Hunza', 'Gilgit-Baltistan', 36.32, 74.65),
+  _FloodLocation('Skardu', 'Gilgit-Baltistan', 35.29, 75.63),
+
+  // ICT
+  _FloodLocation('Islamabad', 'ICT', 33.72, 73.06),
+
+  // AJK
+  _FloodLocation('Mirpur', 'AJK', 33.14, 73.75),
+  _FloodLocation('Muzaffarabad', 'AJK', 34.37, 73.47),
+  _FloodLocation('Neelum', 'AJK', 34.59, 73.91),
+];
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -19,7 +117,10 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   final MlAlertController _ml = Get.find<MlAlertController>();
   GoogleMapController? _mapController;
+  _MapLayer _layer = _MapLayer.flood;
   bool _showHistorical = false;
+  bool _breakdownExpanded = false;
+  _EarthquakeSort _earthquakeSort = _EarthquakeSort.time;
   double _zoomLevel = 5.2;
 
   static const _pakistan = CameraPosition(
@@ -33,6 +134,7 @@ class _MapViewState extends State<MapView> {
     if (_ml.heatmapPoints.isEmpty) _ml.loadFloodHeatmap();
     if (_ml.floodForecast.value == null) _ml.loadFloodForecast(DateTime.now());
     if (_ml.historicalFloods.isEmpty) _ml.loadHistoricalFloods();
+    if (_ml.earthquakeAlerts.isEmpty) _ml.loadEarthquakeAlerts();
   }
 
   // Polygon filter approximating the Durand Line (west) and Radcliffe Line (east).
@@ -78,6 +180,61 @@ class _MapViewState extends State<MapView> {
       ));
     }
     return circles;
+  }
+
+  // ─── Earthquake marker builder ────────────────────────────────────────────
+
+  Set<Marker> _buildEarthquakeMarkers(List<EarthquakeAlertModel> alerts) {
+    final markers = <Marker>{};
+    for (final eq in alerts) {
+      final aftershockCount = eq.predictedAftershocks.length;
+      markers.add(Marker(
+        markerId: MarkerId('eq_main_${eq.eventId}'),
+        position: LatLng(eq.mainshockLatitude, eq.mainshockLongitude),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(
+          title: '${eq.magnitudeLabel} mainshock — ${eq.severity}',
+          snippet:
+              '${eq.mainshockLocation} · $aftershockCount aftershock(s) — tap for details',
+          onTap: () => _openEarthquakeDetail(eq),
+        ),
+      ));
+    }
+    return markers;
+  }
+
+  Set<Circle> _buildAftershockCircles(List<EarthquakeAlertModel> alerts) {
+    // Each aftershock is rendered as a translucent disc whose radius is the
+    // empirical felt-shaking radius reported by the backend (MMI ~III). The
+    // colour deepens with magnitude so larger expected aftershocks read as
+    // higher-impact zones at a glance.
+    final circles = <Circle>{};
+    for (final eq in alerts) {
+      for (final a in eq.predictedAftershocks) {
+        final color = _aftershockColor(a.magnitude);
+        circles.add(Circle(
+          circleId: CircleId('eq_after_${eq.eventId}_${a.rank}'),
+          center: LatLng(a.latitude, a.longitude),
+          radius: a.affectedRadiusKm * 1000, // km → metres
+          fillColor: color.withValues(alpha: 0.22),
+          strokeColor: color,
+          strokeWidth: 2,
+        ));
+      }
+    }
+    return circles;
+  }
+
+  Color _aftershockColor(double magnitude) {
+    if (magnitude >= 6.0) return const Color(0xFF8B0000); // dark red
+    if (magnitude >= 5.0) return const Color(0xFFEF4444); // red
+    if (magnitude >= 4.0) return const Color(0xFFF97316); // orange
+    if (magnitude >= 3.0) return const Color(0xFFEAB308); // amber
+    return const Color(0xFFFACC15);                       // yellow
+  }
+
+  void _openEarthquakeDetail(EarthquakeAlertModel alert) {
+    Get.to(() => const EarthquakeAlertDetailView(), arguments: alert);
   }
 
   Color _riskLevelColor(String level) {
@@ -150,13 +307,20 @@ class _MapViewState extends State<MapView> {
         children: [
           // ── Google Map ────────────────────────────────────────────────
           Obx(() {
-            final circles = _showHistorical
-                ? _buildHeatmap(_ml.historicalModelPoints)
-                : _buildHeatmap(_ml.heatmapPoints);
+            final isFlood = _layer == _MapLayer.flood;
+            final circles = isFlood
+                ? (_showHistorical
+                    ? _buildHeatmap(_ml.historicalModelPoints)
+                    : _buildHeatmap(_ml.heatmapPoints))
+                : _buildAftershockCircles(_ml.earthquakeAlerts);
+            final markers = isFlood
+                ? <Marker>{}
+                : _buildEarthquakeMarkers(_ml.earthquakeAlerts);
 
             return GoogleMap(
               initialCameraPosition: _pakistan,
               circles: circles,
+              markers: markers,
               style: isDark ? _darkMapStyle : null,
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
@@ -172,7 +336,7 @@ class _MapViewState extends State<MapView> {
             );
           }),
 
-          // ── Overlays (top bar + bottom panel) ────────────────────────
+          // ── Overlays (top bar + map controls + bottom panel) ─────────
           SafeArea(
             child: Column(
               children: [
@@ -187,19 +351,35 @@ class _MapViewState extends State<MapView> {
                   return _buildFallbackLocationBanner();
                 }),
                 const Spacer(),
-                _showHistorical
-                    ? _buildHistoricalPanel(theme)
-                    : _buildLivePanel(theme),
+                // Right-aligned map controls (zoom slider + locate),
+                // anchored just above the bottom panel so they never
+                // overlap with the panel content or each other.
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _buildMapControls(theme),
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                if (_layer == _MapLayer.earthquake)
+                  _buildEarthquakePanel(theme)
+                else if (_showHistorical)
+                  _buildHistoricalPanel(theme)
+                else
+                  _buildLivePanel(theme),
               ],
             ),
           ),
 
           // ── Loading spinner ───────────────────────────────────────────
           Obx(() {
-            final loading = _showHistorical
-                ? (_ml.isLoadingHistory.value ||
-                    _ml.isLoadingHistoricalModel.value)
-                : _ml.isLoadingHeatmap.value;
+            final loading = _layer == _MapLayer.earthquake
+                ? _ml.isLoadingEarthquakes.value
+                : (_showHistorical
+                    ? (_ml.isLoadingHistory.value ||
+                        _ml.isLoadingHistoricalModel.value)
+                    : _ml.isLoadingHeatmap.value);
             if (!loading) return const SizedBox.shrink();
             return Positioned(
               top: 100.h,
@@ -227,9 +407,11 @@ class _MapViewState extends State<MapView> {
                           ),
                           SizedBox(width: 10.w),
                           Text(
-                            _showHistorical
-                                ? 'Loading history…'
-                                : 'Loading heatmap…',
+                            _layer == _MapLayer.earthquake
+                                ? 'Loading earthquakes…'
+                                : (_showHistorical
+                                    ? 'Loading history…'
+                                    : 'Fetching data…'),
                             style: TextStyle(
                                 color: AppTheme.white, fontSize: 13.sp),
                           ),
@@ -242,89 +424,95 @@ class _MapViewState extends State<MapView> {
             );
           }),
 
-          // ── Zoom slider ───────────────────────────────────────────────
-          Positioned(
-            right: 12.w,
-            top: 0,
-            bottom: 0,
-            child: SafeArea(
-              child: Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20.r),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      width: 44.w,
-                      padding: EdgeInsets.symmetric(vertical: 10.h),
-                      color: theme.cardColor.withValues(alpha: 0.85),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.add,
-                              size: 18.sp,
-                              color: theme.textTheme.bodyLarge?.color),
-                          SizedBox(height: 4.h),
-                          RotatedBox(
-                            quarterTurns: 3,
-                            child: SizedBox(
-                              width: 120.h,
-                              child: SliderTheme(
-                                data: SliderTheme.of(context).copyWith(
-                                  trackHeight: 3,
-                                  thumbShape: RoundSliderThumbShape(
-                                      enabledThumbRadius: 7.r),
-                                  overlayShape: RoundSliderOverlayShape(
-                                      overlayRadius: 12.r),
-                                  activeTrackColor: AppTheme.primaryColor,
-                                  inactiveTrackColor: AppTheme.primaryColor
-                                      .withValues(alpha: 0.25),
-                                  thumbColor: AppTheme.primaryColor,
-                                  overlayColor: AppTheme.primaryColor
-                                      .withValues(alpha: 0.15),
-                                ),
-                                child: Slider(
-                                  value: _zoomLevel.clamp(5.0, 20.0),
-                                  min: 5.0,
-                                  max: 20.0,
-                                  onChanged: (v) {
-                                    setState(() => _zoomLevel = v);
-                                    _mapController
-                                        ?.animateCamera(CameraUpdate.zoomTo(v));
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Icon(Icons.remove,
-                              size: 18.sp,
-                              color: theme.textTheme.bodyLarge?.color),
-                        ],
-                      ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Map controls (zoom slider + locate) ──────────────────────────────────
+
+  Widget _buildMapControls(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _buildZoomSlider(theme),
+        SizedBox(height: 8.h),
+        _buildLocateFab(theme),
+      ],
+    );
+  }
+
+  Widget _buildZoomSlider(ThemeData theme) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20.r),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          width: 40.w,
+          padding: EdgeInsets.symmetric(vertical: 6.h),
+          color: theme.cardColor.withValues(alpha: 0.85),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.add,
+                  size: 16.sp, color: theme.textTheme.bodyLarge?.color),
+              SizedBox(height: 2.h),
+              RotatedBox(
+                quarterTurns: 3,
+                child: SizedBox(
+                  width: 90.h,
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 3,
+                      thumbShape:
+                          RoundSliderThumbShape(enabledThumbRadius: 6.r),
+                      overlayShape:
+                          RoundSliderOverlayShape(overlayRadius: 11.r),
+                      activeTrackColor: AppTheme.primaryColor,
+                      inactiveTrackColor:
+                          AppTheme.primaryColor.withValues(alpha: 0.25),
+                      thumbColor: AppTheme.primaryColor,
+                      overlayColor:
+                          AppTheme.primaryColor.withValues(alpha: 0.15),
+                    ),
+                    child: Slider(
+                      value: _zoomLevel.clamp(5.0, 20.0),
+                      min: 5.0,
+                      max: 20.0,
+                      onChanged: (v) {
+                        setState(() => _zoomLevel = v);
+                        _mapController
+                            ?.animateCamera(CameraUpdate.zoomTo(v));
+                      },
                     ),
                   ),
                 ),
               ),
-            ),
+              SizedBox(height: 2.h),
+              Icon(Icons.remove,
+                  size: 16.sp, color: theme.textTheme.bodyLarge?.color),
+            ],
           ),
+        ),
+      ),
+    );
+  }
 
-          // ── Reset camera FAB ──────────────────────────────────────────
-          Positioned(
-            bottom: 240.h,
-            right: 16.w,
-            child: FloatingActionButton.small(
-              backgroundColor: theme.cardColor,
-              elevation: 4,
-              onPressed: () {
-                setState(() => _zoomLevel = 5.2);
-                _mapController?.animateCamera(
-                    CameraUpdate.newCameraPosition(_pakistan));
-              },
-              child: Icon(Icons.my_location,
-                  color: AppTheme.primaryColor, size: 20.sp),
-            ),
-          ),
-        ],
+  Widget _buildLocateFab(ThemeData theme) {
+    return SizedBox(
+      width: 40.w,
+      height: 40.w,
+      child: FloatingActionButton.small(
+        backgroundColor: theme.cardColor,
+        elevation: 4,
+        onPressed: () {
+          setState(() => _zoomLevel = 5.2);
+          _mapController
+              ?.animateCamera(CameraUpdate.newCameraPosition(_pakistan));
+        },
+        child: Icon(Icons.my_location,
+            color: AppTheme.primaryColor, size: 18.sp),
       ),
     );
   }
@@ -332,6 +520,7 @@ class _MapViewState extends State<MapView> {
   // ─── Top bar ──────────────────────────────────────────────────────────────
 
   Widget _buildTopBar(ThemeData theme) {
+    final isFlood = _layer == _MapLayer.flood;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       child: Row(
@@ -345,79 +534,127 @@ class _MapViewState extends State<MapView> {
                 child: IconButton(
                   icon: Icon(Icons.arrow_back, size: 20.sp),
                   color: theme.textTheme.bodyLarge?.color,
-                  onPressed: () => Get.back(),
+                  onPressed: _handleBack,
                 ),
               ),
             ),
           ),
           SizedBox(width: 8.w),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.r),
+          Expanded(child: Center(child: _buildLayerToggle(theme))),
+          SizedBox(width: 8.w),
+          if (isFlood)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10.r),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 14.w, vertical: 10.h),
-                  color: theme.cardColor.withValues(alpha: 0.85),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(
-                        AppAssets.dropletsIcon,
-                        width: 16.w,
-                        height: 16.h,
-                        colorFilter: const ColorFilter.mode(
-                            AppTheme.primaryColor, BlendMode.srcIn),
+                child: GestureDetector(
+                  onTap: () =>
+                      setState(() => _showHistorical = !_showHistorical),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 12.w, vertical: 10.h),
+                    decoration: BoxDecoration(
+                      gradient: _showHistorical
+                          ? AppTheme.primaryGradient
+                          : AppTheme.purpleGradient,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Text(
+                      _showHistorical ? 'Live' : 'History',
+                      style: TextStyle(
+                        color: AppTheme.white,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
                       ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        _showHistorical
-                            ? 'Historical Flood Events'
-                            : 'Pakistan Flood Heatmap',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: GestureDetector(
-                onTap: () => setState(() => _showHistorical = !_showHistorical),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 12.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    gradient: _showHistorical
-                        ? AppTheme.primaryGradient
-                        : AppTheme.purpleGradient,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Text(
-                    _showHistorical ? 'Live' : 'History',
-                    style: TextStyle(
-                      color: AppTheme.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  // ─── Live (current heatmap) panel ─────────────────────────────────────────
+  void _handleBack() {
+    if (Navigator.canPop(context)) {
+      Get.back();
+      return;
+    }
+    if (Get.isRegistered<NavigationController>()) {
+      Get.find<NavigationController>().changePage(0);
+    }
+  }
+
+  Widget _buildLayerToggle(ThemeData theme) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(50.r),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: EdgeInsets.all(3.r),
+          decoration: BoxDecoration(
+            color: theme.cardColor.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(50.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _layerSegment(theme, _MapLayer.flood,
+                  AppAssets.dropletsIcon, 'Flood'),
+              _layerSegment(theme, _MapLayer.earthquake, null, 'Earthquake'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _layerSegment(
+      ThemeData theme, _MapLayer mode, String? svgAsset, String label) {
+    final active = _layer == mode;
+    final fg = active ? AppTheme.white : theme.textTheme.bodyLarge?.color;
+    return GestureDetector(
+      onTap: () {
+        if (_layer == mode) return;
+        setState(() => _layer = mode);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          gradient: active ? AppTheme.primaryGradient : null,
+          borderRadius: BorderRadius.circular(50.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (svgAsset != null)
+              SvgPicture.asset(
+                svgAsset,
+                width: 14.w,
+                height: 14.h,
+                colorFilter: ColorFilter.mode(
+                    fg ?? AppTheme.primaryColor, BlendMode.srcIn),
+              )
+            else
+              Icon(Icons.public, size: 14.sp, color: fg),
+            SizedBox(width: 6.w),
+            Text(
+              label,
+              style: TextStyle(
+                color: fg,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── Live (current heatmap) panel — compact 3-row layout ─────────────────
 
   Widget _buildLivePanel(ThemeData theme) {
     return ClipRRect(
@@ -426,77 +663,766 @@ class _MapViewState extends State<MapView> {
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 20.h),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 14.h),
           color: theme.cardColor.withValues(alpha: 0.92),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeatmapLegend(theme),
-              SizedBox(height: 14.h),
-              Divider(height: 1.h, color: theme.dividerColor),
-              SizedBox(height: 14.h),
               Row(
                 children: [
-                  Text('Forecast Date',
-                      style: theme.textTheme.headlineMedium),
+                  _buildHorizonToggle(theme),
                   const Spacer(),
-                  Obx(() {
-                    final d = _ml.selectedDate.value;
-                    return GestureDetector(
-                      onTap: _pickDate,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.w, vertical: 7.h),
-                        decoration: BoxDecoration(
-                          gradient: AppTheme.primaryGradient,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.calendar_today,
-                                size: 14.sp, color: AppTheme.white),
-                            SizedBox(width: 6.w),
-                            Text(
-                              '${d.year}-'
-                              '${d.month.toString().padLeft(2, '0')}-'
-                              '${d.day.toString().padLeft(2, '0')}',
-                              style: TextStyle(
-                                  color: AppTheme.white,
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+                  _buildLocationPill(theme),
                 ],
               ),
-              SizedBox(height: 14.h),
+              SizedBox(height: 10.h),
               Obx(() {
                 if (_ml.isLoadingForecast.value) {
-                  return Center(
-                    child: SizedBox(
-                      height: 32.h,
-                      child: const CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
+                  return _compactStatusRow(
+                      theme, 'Loading next-24h forecast…', spinner: true);
                 }
-                final forecast = _ml.floodForecast.value;
-                if (forecast == null) {
-                  return Text(
-                    'Select a date to see the flood forecast.',
-                    style: theme.textTheme.bodySmall,
-                  );
+                final f = _ml.floodForecast.value;
+                if (f == null) {
+                  return _compactStatusRow(
+                      theme, 'Loading next-24h forecast…');
                 }
-                return _buildForecastResult(forecast, theme);
+                return _compactForecastCard(f, theme);
               }),
             ],
           ),
         ),
       ),
     );
+  }
+
+  // ─── Location pill + selection sheet ──────────────────────────────────────
+
+  Widget _buildLocationPill(ThemeData theme) {
+    return Obx(() {
+      final label = _ml.floodLocationLabel.value ?? 'My location';
+      final isCity = _ml.floodLocationLabel.value != null;
+      return GestureDetector(
+        onTap: _openLocationSheet,
+        behavior: HitTestBehavior.opaque,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(50.r),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: theme.dividerColor.withValues(alpha: 0.32),
+                borderRadius: BorderRadius.circular(50.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isCity ? Icons.place : Icons.my_location,
+                    size: 13.sp,
+                    color: AppTheme.primaryColor,
+                  ),
+                  SizedBox(width: 5.w),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 110.w),
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: theme.textTheme.bodyLarge?.color,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 2.w),
+                  Icon(Icons.expand_more,
+                      size: 14.sp, color: theme.textTheme.bodyLarge?.color),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> _openLocationSheet() async {
+    final currentLabel = _ml.floodLocationLabel.value;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _LocationSheet(
+        currentLabel: currentLabel,
+        onSelect: _selectLocation,
+      ),
+    );
+  }
+
+  void _selectLocation(_FloodLocation? loc) {
+    Navigator.of(context).pop();
+    if (loc == null) {
+      _ml.setFloodLocationOverride();
+      _mapController?.animateCamera(
+          CameraUpdate.newCameraPosition(_pakistan));
+    } else {
+      _ml.setFloodLocationOverride(
+        label: loc.name,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+      );
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: LatLng(loc.latitude, loc.longitude), zoom: 8),
+        ),
+      );
+    }
+  }
+
+  Widget _compactForecastCard(FloodAlertModel f, ThemeData theme) {
+    final color = _riskColor(f.riskLevel);
+    return Container(
+      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 8.w,
+                height: 8.w,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                '${f.riskLevel} Risk',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${f.rainfallMm.toStringAsFixed(1)} mm',
+                style: theme.textTheme.bodySmall?.copyWith(fontSize: 11.sp),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                '${f.riskPercent}%',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6.h),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50.r),
+            child: LinearProgressIndicator(
+              value: (f.riskScore / 100).clamp(0.0, 1.0),
+              backgroundColor: color.withValues(alpha: 0.15),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+              minHeight: 6.h,
+            ),
+          ),
+          if (f.affectedAreas.isNotEmpty) ...[
+            SizedBox(height: 6.h),
+            Text(
+              f.affectedAreas.take(3).join(' · '),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10.sp,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          if (f.signals.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            _buildBreakdownToggle(f, theme, color),
+            if (_breakdownExpanded) ...[
+              SizedBox(height: 8.h),
+              _buildBreakdown(f, theme, color),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ─── Risk-score breakdown ─────────────────────────────────────────────────
+
+  Widget _buildBreakdownToggle(
+      FloodAlertModel f, ThemeData theme, Color color) {
+    return GestureDetector(
+      onTap: () =>
+          setState(() => _breakdownExpanded = !_breakdownExpanded),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        children: [
+          Icon(
+            _breakdownExpanded ? Icons.expand_less : Icons.expand_more,
+            size: 14.sp,
+            color: color,
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            _breakdownExpanded ? 'Hide breakdown' : 'Why this score?',
+            style: TextStyle(
+              color: color,
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (!_breakdownExpanded && f.zone.isNotEmpty) ...[
+            SizedBox(width: 6.w),
+            Text(
+              '· ${f.zone}',
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(fontSize: 10.sp),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBreakdown(FloodAlertModel f, ThemeData theme, Color color) {
+    // The four primary signals that compose the base risk score in the
+    // backend's flood model. Each value is the signal's saturation level
+    // 0–100 (1 - exp(-rainfall/threshold) × 100), so it answers "how
+    // strongly is this factor firing?".
+    final entries = <_BreakdownEntry>[
+      _BreakdownEntry(
+        'Intensity',
+        '1-day burst',
+        f.signals['intensity'] ?? 0,
+      ),
+      _BreakdownEntry(
+        'Cumulative',
+        '3-day rainfall',
+        f.signals['cumulative'] ?? 0,
+      ),
+      _BreakdownEntry(
+        'Riverine',
+        'Upstream catchment',
+        f.signals['riverine'] ?? 0,
+      ),
+      _BreakdownEntry(
+        'Saturation',
+        '14-day ground wetness',
+        f.signals['saturation'] ?? 0,
+      ),
+    ];
+
+    String anomalyNote;
+    final a = f.anomalyFactor;
+    if (a > 1.20) {
+      anomalyNote = 'rainfall is well above seasonal normal';
+    } else if (a > 1.05) {
+      anomalyNote = 'slightly above seasonal normal';
+    } else if (a < 0.90) {
+      anomalyNote = 'below seasonal normal';
+    } else {
+      anomalyNote = 'near seasonal normal';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...entries.map((e) => _buildBreakdownRow(e, color, theme)),
+        SizedBox(height: 6.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (f.zone.isNotEmpty)
+                _breakdownLine(
+                    theme, 'Zone', f.zone, 'flood-mechanism regime'),
+              _breakdownLine(
+                theme,
+                'Climatology',
+                '${a.toStringAsFixed(2)}×',
+                anomalyNote,
+              ),
+              _breakdownLine(
+                theme,
+                'Score',
+                '${f.riskPercent}%',
+                'weighted signals × climatology + zone baseline',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBreakdownRow(
+      _BreakdownEntry e, Color color, ThemeData theme) {
+    final pct = e.value.clamp(0.0, 100.0);
+    return Padding(
+      padding: EdgeInsets.only(bottom: 5.h),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 78.w,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  e.label,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: theme.textTheme.bodyLarge?.color,
+                    height: 1.0,
+                  ),
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  e.subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 9.sp),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(50.r),
+              child: LinearProgressIndicator(
+                value: pct / 100,
+                backgroundColor: color.withValues(alpha: 0.12),
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+                minHeight: 5.h,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          SizedBox(
+            width: 38.w,
+            child: Text(
+              '${pct.round()}%',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _breakdownLine(
+      ThemeData theme, String label, String value, String note) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 1.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 78.w,
+            child: Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(width: 6.w),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: theme.textTheme.bodySmall?.copyWith(fontSize: 10.sp),
+                children: [
+                  TextSpan(
+                    text: value,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  TextSpan(text: '  $note'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _compactStatusRow(ThemeData theme, String text, {bool spinner = false}) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 6.h),
+      child: Row(
+        children: [
+          if (spinner) ...[
+            SizedBox(
+              width: 14.w,
+              height: 14.w,
+              child: const CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 10.w),
+          ],
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Earthquake panel ─────────────────────────────────────────────────────
+
+  Widget _buildEarthquakePanel(ThemeData theme) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 14.h),
+          color: theme.cardColor.withValues(alpha: 0.92),
+          child: Obx(() {
+            if (_ml.isLoadingEarthquakes.value) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 18.h),
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            }
+            final alerts = _ml.earthquakeAlerts;
+            if (alerts.isEmpty) {
+              return Row(
+                children: [
+                  Icon(Icons.check_circle_outline,
+                      color: const Color(0xFF22C55E), size: 16.sp),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      'No earthquakes in the past 7 days.',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _ml.loadEarthquakeAlerts,
+                    child: Icon(Icons.refresh,
+                        color: AppTheme.primaryColor, size: 18.sp),
+                  ),
+                ],
+              );
+            }
+            final totalAfter = alerts.fold<int>(
+                0, (s, e) => s + e.predictedAftershocks.length);
+            final sorted = _sortedEarthquakes(alerts);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Earthquakes · last 7 days',
+                            style: theme.textTheme.headlineMedium,
+                          ),
+                          SizedBox(height: 1.h),
+                          Text(
+                            '${alerts.length} events  ·  $totalAfter predicted aftershocks',
+                            style: theme.textTheme.bodySmall
+                                ?.copyWith(fontSize: 10.sp),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: _ml.loadEarthquakeAlerts,
+                      child: Icon(Icons.refresh,
+                          color: AppTheme.primaryColor, size: 18.sp),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                _buildEarthquakeSortToggle(theme),
+                SizedBox(height: 8.h),
+                Divider(height: 1.h, color: theme.dividerColor),
+                SizedBox(height: 4.h),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 200.h),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: sorted.length,
+                    separatorBuilder: (_, _) => SizedBox(height: 4.h),
+                    itemBuilder: (_, i) =>
+                        _buildEarthquakeRow(sorted[i], theme),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  // ─── Earthquake row + sort toggle + helpers ───────────────────────────────
+
+  List<EarthquakeAlertModel> _sortedEarthquakes(
+      List<EarthquakeAlertModel> alerts) {
+    final sorted = [...alerts];
+    switch (_earthquakeSort) {
+      case _EarthquakeSort.time:
+        sorted.sort((a, b) {
+          final ta = DateTime.tryParse(a.mainshockTimestamp);
+          final tb = DateTime.tryParse(b.mainshockTimestamp);
+          if (ta == null && tb == null) return 0;
+          if (ta == null) return 1;
+          if (tb == null) return -1;
+          return tb.compareTo(ta); // newest first
+        });
+      case _EarthquakeSort.magnitude:
+        sorted.sort(
+            (a, b) => b.mainshockMagnitude.compareTo(a.mainshockMagnitude));
+      case _EarthquakeSort.distance:
+        sorted.sort(
+            (a, b) => a.distanceToUserKm.compareTo(b.distanceToUserKm));
+    }
+    return sorted;
+  }
+
+  Widget _buildEarthquakeSortToggle(ThemeData theme) {
+    return Row(
+      children: [
+        Text(
+          'Sort by',
+          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10.sp),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50.r),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: EdgeInsets.all(2.r),
+                decoration: BoxDecoration(
+                  color: theme.dividerColor.withValues(alpha: 0.32),
+                  borderRadius: BorderRadius.circular(50.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: _earthquakeSortSegment(
+                          theme, _EarthquakeSort.time, Icons.schedule, 'Time'),
+                    ),
+                    Expanded(
+                      child: _earthquakeSortSegment(theme,
+                          _EarthquakeSort.magnitude, Icons.bar_chart, 'Mag'),
+                    ),
+                    Expanded(
+                      child: _earthquakeSortSegment(theme,
+                          _EarthquakeSort.distance, Icons.near_me, 'Near'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _earthquakeSortSegment(
+      ThemeData theme, _EarthquakeSort mode, IconData icon, String label) {
+    final active = _earthquakeSort == mode;
+    final fg = active ? AppTheme.white : theme.textTheme.bodyLarge?.color;
+    return GestureDetector(
+      onTap: () => setState(() => _earthquakeSort = mode),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(vertical: 5.h),
+        decoration: BoxDecoration(
+          gradient: active ? AppTheme.primaryGradient : null,
+          borderRadius: BorderRadius.circular(50.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 11.sp, color: fg),
+            SizedBox(width: 3.w),
+            Text(
+              label,
+              style: TextStyle(
+                color: fg,
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEarthquakeRow(EarthquakeAlertModel eq, ThemeData theme) {
+    final color = _earthquakeSeverityColor(eq.mainshockMagnitude);
+    final aftershockCount = eq.predictedAftershocks.length;
+    final timeAgo = _timeAgo(eq.mainshockTimestamp);
+    return InkWell(
+      onTap: () => _openEarthquakeDetail(eq),
+      borderRadius: BorderRadius.circular(8.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
+        child: Row(
+          children: [
+            Container(
+              width: 50.w,
+              padding: EdgeInsets.symmetric(vertical: 6.h),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: color.withValues(alpha: 0.40)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    eq.magnitudeLabel,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w800,
+                      height: 1.0,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    eq.severity.toUpperCase(),
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.4,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    eq.mainshockLocation,
+                    style: TextStyle(
+                      color: theme.textTheme.bodyLarge?.color,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      height: 1.15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 2.h),
+                  Row(
+                    children: [
+                      _eqRowTag(
+                          theme,
+                          Icons.near_me,
+                          '${eq.distanceToUserKm.toStringAsFixed(0)} km'),
+                      SizedBox(width: 6.w),
+                      _eqRowTag(theme, Icons.bolt, '$aftershockCount aft.'),
+                      if (timeAgo.isNotEmpty) ...[
+                        SizedBox(width: 6.w),
+                        _eqRowTag(theme, Icons.schedule, timeAgo),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Icon(Icons.chevron_right,
+                size: 16.sp, color: theme.textTheme.bodySmall?.color),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _eqRowTag(ThemeData theme, IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 10.sp, color: theme.textTheme.bodySmall?.color),
+        SizedBox(width: 2.w),
+        Text(
+          text,
+          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10.sp),
+        ),
+      ],
+    );
+  }
+
+  Color _earthquakeSeverityColor(double mag) {
+    if (mag >= 7.0) return const Color(0xFF8B0000);
+    if (mag >= 5.5) return const Color(0xFFEF4444);
+    if (mag >= 4.0) return const Color(0xFFF97316);
+    if (mag >= 3.0) return const Color(0xFFEAB308);
+    return const Color(0xFFFACC15);
+  }
+
+  String _timeAgo(String iso) {
+    if (iso.isEmpty) return '';
+    final t = DateTime.tryParse(iso);
+    if (t == null) return '';
+    final diff = DateTime.now().toUtc().difference(t.toUtc());
+    if (diff.isNegative) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    final days = diff.inDays;
+    final hours = diff.inHours - days * 24;
+    if (hours == 0) return '${days}d ago';
+    return '${days}d ${hours}h ago';
   }
 
   // ─── Historical panel ─────────────────────────────────────────────────────
@@ -648,160 +1574,72 @@ class _MapViewState extends State<MapView> {
     );
   }
 
-  // ─── Forecast result ──────────────────────────────────────────────────────
 
-  Widget _buildForecastResult(FloodAlertModel forecast, ThemeData theme) {
-    final color = _riskColor(forecast.riskLevel);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text('Risk Level: ', style: theme.textTheme.bodySmall),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: color.withValues(alpha: 0.30)),
-              ),
-              child: Text(
-                forecast.riskLevel,
-                style: theme.textTheme.bodySmall?.copyWith(
-                    color: color, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 6.h),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(50.r),
-          child: LinearProgressIndicator(
-            value: (forecast.riskScore / 100).clamp(0.0, 1.0),
-            backgroundColor: theme.dividerColor,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 7.h,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          '${forecast.riskPercent}% risk  ·  '
-          '${forecast.rainfallMm.toStringAsFixed(1)} mm rainfall',
-          style: theme.textTheme.bodySmall,
-        ),
-        if (forecast.affectedAreas.isNotEmpty) ...[
-          SizedBox(height: 4.h),
-          Text(
-            forecast.affectedAreas.take(2).join(', '),
-            style: theme.textTheme.bodySmall?.copyWith(color: color),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ],
-    );
-  }
+  // ─── Horizon toggle (Today / Tomorrow) ────────────────────────────────────
 
-  // ─── Heatmap legend ───────────────────────────────────────────────────────
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
-  Widget _buildHeatmapLegend(ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('High', style: theme.textTheme.bodySmall),
-            Text('Critical', style: theme.textTheme.bodySmall),
-          ],
-        ),
-        SizedBox(height: 4.h),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4.r),
+  Widget _buildHorizonToggle(ThemeData theme) {
+    return Obx(() {
+      final selected = _ml.selectedDate.value;
+      final today = DateTime.now();
+      final tomorrow = today.add(const Duration(days: 1));
+      // If selectedDate has drifted to a non-24h value (e.g. via an older
+      // session), default the highlight to Today so the UI stays coherent.
+      var isToday = _isSameDay(selected, today);
+      final isTomorrow = _isSameDay(selected, tomorrow);
+      if (!isToday && !isTomorrow) isToday = true;
+
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(50.r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            height: 8.h,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFF97316), Color(0xFFEF4444)],
-              ),
+            padding: EdgeInsets.all(3.r),
+            decoration: BoxDecoration(
+              color: theme.dividerColor.withValues(alpha: 0.30),
+              borderRadius: BorderRadius.circular(50.r),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _horizonSegment(theme, 'Today', isToday, 0),
+                _horizonSegment(theme, 'Tomorrow', isTomorrow, 1),
+              ],
             ),
           ),
         ),
-        SizedBox(height: 10.h),
-        Obx(() {
-          final pts = _showHistorical
-              ? _ml.historicalModelPoints
-              : _ml.heatmapPoints;
-          final pak = pts.where((p) => _inPakistan(p.lat, p.lon));
-          final critical =
-              pak.where((p) => p.riskLevel.toUpperCase() == 'CRITICAL').length;
-          final high =
-              pak.where((p) => p.riskLevel.toUpperCase() == 'HIGH').length;
-          final moderate =
-              pak.where((p) => p.riskLevel.toUpperCase() == 'MODERATE').length;
-          if (critical == 0 && high == 0 && moderate == 0) {
-            return Row(
-              children: [
-                Icon(Icons.check_circle_outline,
-                    size: 14.sp, color: const Color(0xFF22C55E)),
-                SizedBox(width: 6.w),
-                Text('No elevated risk zones in Pakistan',
-                    style: theme.textTheme.bodySmall),
-              ],
-            );
-          }
-          return Wrap(
-            spacing: 6.w,
-            runSpacing: 4.h,
-            children: [
-              if (critical > 0)
-                _zoneBadge(critical, 'Critical', const Color(0xFFEF4444), theme),
-              if (high > 0)
-                _zoneBadge(high, 'High', const Color(0xFFF97316), theme),
-              if (moderate > 0)
-                _zoneBadge(moderate, 'Moderate', const Color(0xFFEAB308), theme),
-            ],
-          );
-        }),
-      ],
-    );
+      );
+    });
   }
 
-  Widget _zoneBadge(int count, String label, Color color, ThemeData theme) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(color: color.withValues(alpha: 0.30)),
-      ),
-      child: Text(
-        '$count $label',
-        style: theme.textTheme.bodySmall
-            ?.copyWith(color: color, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-
-  // ─── Date picker ──────────────────────────────────────────────────────────
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _ml.selectedDate.value,
-      firstDate: DateTime(2014),
-      lastDate: DateTime.now().add(const Duration(days: 16)),
-      helpText: 'Select forecast date',
-      builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: AppTheme.primaryColor,
-            onPrimary: AppTheme.white,
+  Widget _horizonSegment(
+      ThemeData theme, String label, bool active, int dayOffset) {
+    final fg = active ? AppTheme.white : theme.textTheme.bodyLarge?.color;
+    return GestureDetector(
+      onTap: () {
+        if (active) return;
+        final base = DateTime.now();
+        _ml.loadFloodForecast(base.add(Duration(days: dayOffset)));
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          gradient: active ? AppTheme.primaryGradient : null,
+          borderRadius: BorderRadius.circular(50.r),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: fg,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        child: child!,
       ),
     );
-    if (picked != null) _ml.loadFloodForecast(picked);
   }
 
   Color _riskColor(String level) {
@@ -844,3 +1682,243 @@ const String _darkMapStyle = '''
   {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#3d3d3d"}]}
 ]
 ''';
+
+// ─── Location bottom sheet (search + grouped list) ─────────────────────────
+
+class _LocationSheet extends StatefulWidget {
+  final String? currentLabel;
+  final void Function(_FloodLocation?) onSelect;
+
+  const _LocationSheet({
+    required this.currentLabel,
+    required this.onSelect,
+  });
+
+  @override
+  State<_LocationSheet> createState() => _LocationSheetState();
+}
+
+class _LocationSheetState extends State<_LocationSheet> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  List<_FloodLocation> get _filtered {
+    if (_query.isEmpty) return _pakistanCities;
+    final q = _query.toLowerCase();
+    return _pakistanCities
+        .where((c) =>
+            c.name.toLowerCase().contains(q) ||
+            c.province.toLowerCase().contains(q))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final filtered = _filtered;
+    final myLocActive = widget.currentLabel == null;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          color: theme.cardColor.withValues(alpha: 0.96),
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
+          constraints: BoxConstraints(maxHeight: 560.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Text(
+                  'Forecast location',
+                  style: theme.textTheme.headlineMedium,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                child: Text(
+                  'Pick anywhere in Pakistan to see its 24-hour flood forecast.',
+                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 11.sp),
+                ),
+              ),
+              SizedBox(height: 10.h),
+              // Search bar
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: theme.dividerColor.withValues(alpha: 0.30),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search,
+                        size: 18.sp,
+                        color: theme.textTheme.bodySmall?.color),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchCtrl,
+                        onChanged: (v) => setState(() => _query = v),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          hintText: 'Search city or province',
+                          hintStyle: theme.textTheme.bodySmall
+                              ?.copyWith(fontSize: 12.sp),
+                        ),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                    ),
+                    if (_query.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          _searchCtrl.clear();
+                          setState(() => _query = '');
+                        },
+                        child: Icon(Icons.close,
+                            size: 16.sp,
+                            color: theme.textTheme.bodySmall?.color),
+                      ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Flexible(
+                child: filtered.isEmpty
+                    ? Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24.h),
+                        child: Center(
+                          child: Text(
+                            'No cities match "$_query"',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filtered.length + 2,
+                        itemBuilder: (ctx, i) {
+                          // Slot 0: My location · Slot 1: divider · Slot 2+: cities
+                          if (i == 0) {
+                            return _LocationTile(
+                              label: 'My location',
+                              subtitle: 'Use your GPS position',
+                              active: myLocActive,
+                              icon: Icons.my_location,
+                              onTap: () => widget.onSelect(null),
+                            );
+                          }
+                          if (i == 1) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 6.h),
+                              child: Divider(
+                                  height: 1.h, color: theme.dividerColor),
+                            );
+                          }
+                          final c = filtered[i - 2];
+                          return _LocationTile(
+                            label: c.name,
+                            subtitle: c.province,
+                            active: widget.currentLabel == c.name,
+                            onTap: () => widget.onSelect(c),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationTile extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final bool active;
+  final IconData? icon;
+  final VoidCallback onTap;
+
+  const _LocationTile({
+    required this.label,
+    required this.subtitle,
+    required this.active,
+    required this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color =
+        active ? AppTheme.primaryColor : theme.textTheme.bodyLarge?.color;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
+        child: Row(
+          children: [
+            Icon(
+              icon ?? Icons.place_outlined,
+              size: 16.sp,
+              color: active
+                  ? AppTheme.primaryColor
+                  : theme.textTheme.bodySmall?.color,
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 13.sp,
+                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 10.sp),
+                  ),
+                ],
+              ),
+            ),
+            if (active)
+              Icon(Icons.check_circle,
+                  size: 16.sp, color: AppTheme.primaryColor),
+          ],
+        ),
+      ),
+    );
+  }
+}
