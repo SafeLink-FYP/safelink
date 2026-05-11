@@ -32,6 +32,9 @@ class MlAlertController extends GetxController {
   double _lat = 30.3753;
   double _lng = 69.3451;
 
+  double get lat => _lat;
+  double get lng => _lng;
+
   // Optional explicit location for the flood forecast. When non-null, the
   // forecast endpoint is queried at this point instead of the user's GPS
   // position. Set via [setFloodLocationOverride] from the map UI.

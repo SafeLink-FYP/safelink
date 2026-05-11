@@ -8,8 +8,7 @@ import 'package:safelink/features/dashboard/presentation/widgets/ml_alert_cards.
 
 /// Renders the ML-prediction section of the citizen dashboard. Companion
 /// to [GovAlertsHomeSection] which renders authoritative government
-/// alerts above this. The 'PREDICTION' badge overlay on each card
-/// visually distinguishes probabilistic ML output from gov broadcasts.
+/// alerts above this.
 ///
 /// Pre-Active-Alerts-split this widget was `AlertsHomeSection` and was
 /// the dashboard's only alerts surface — conflating ML predictions with
@@ -24,7 +23,8 @@ class PredictedAlertsHomeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Obx(() {
-      final loading = mlController.isLoadingEarthquakes.value ||
+      final loading =
+          mlController.isLoadingEarthquakes.value ||
           mlController.isLoadingHeatmap.value;
 
       if (loading) {
@@ -33,8 +33,7 @@ class PredictedAlertsHomeSection extends StatelessWidget {
             padding: EdgeInsets.all(20.r),
             child: CircularProgressIndicator(
               strokeWidth: 2.w,
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
             ),
           ),
         );
@@ -49,19 +48,22 @@ class PredictedAlertsHomeSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppTheme.green.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(15.r),
-            border:
-                Border.all(color: AppTheme.green.withValues(alpha: 0.20)),
+            border: Border.all(color: AppTheme.green.withValues(alpha: 0.20)),
           ),
           child: Row(
             children: [
-              Icon(Icons.check_circle_rounded,
-                  color: AppTheme.green, size: 25.sp),
+              Icon(
+                Icons.check_circle_rounded,
+                color: AppTheme.green,
+                size: 25.sp,
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
                   'No active predictions for your area',
-                  style: theme.textTheme.headlineMedium
-                      ?.copyWith(color: AppTheme.green),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: AppTheme.green,
+                  ),
                 ),
               ),
             ],
@@ -74,11 +76,9 @@ class PredictedAlertsHomeSection extends StatelessWidget {
       for (int i = 0; i < earthquakes.length && i < 2; i++) {
         items.add(
           Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: _wrapWithPredictionBadge(
-              EarthquakeAlertCard(alert: earthquakes[i]),
-            ),
-          )
+                padding: EdgeInsets.only(bottom: 10.h),
+                child: EarthquakeAlertCard(alert: earthquakes[i]),
+              )
               .animate()
               .fadeIn(duration: 350.ms, delay: (i * 80).ms)
               .slideY(begin: 0.10, end: 0),
@@ -88,9 +88,9 @@ class PredictedAlertsHomeSection extends StatelessWidget {
       if (flood != null) {
         items.add(
           Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: _wrapWithPredictionBadge(FloodRiskCard(flood: flood)),
-          )
+                padding: EdgeInsets.only(bottom: 10.h),
+                child: FloodRiskCard(flood: flood),
+              )
               .animate()
               .fadeIn(duration: 350.ms, delay: (items.length * 80).ms)
               .slideY(begin: 0.10, end: 0),
@@ -99,45 +99,5 @@ class PredictedAlertsHomeSection extends StatelessWidget {
 
       return Column(children: items);
     });
-  }
-
-  /// Overlays a small 'PREDICTION' chip in the top-right of each ML
-  /// alert card. Non-invasive: ml_alert_cards.dart is shared with
-  /// AlertsListView's Earthquakes / Floods tabs (which don't need the
-  /// badge because the tab label already conveys "ML"), so the badge
-  /// is added at the consumer level here, not in the card widgets.
-  Widget _wrapWithPredictionBadge(Widget card) {
-    return Stack(
-      children: [
-        card,
-        Positioned(
-          top: 8.h,
-          right: 8.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 6.w,
-              vertical: 2.h,
-            ),
-            decoration: BoxDecoration(
-              color: AppTheme.amber.withValues(alpha: 0.20),
-              borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(
-                color: AppTheme.amber.withValues(alpha: 0.40),
-                width: 1.w,
-              ),
-            ),
-            child: Text(
-              'PREDICTION',
-              style: TextStyle(
-                fontSize: 9.sp,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.amber,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
